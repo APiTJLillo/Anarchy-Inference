@@ -1,0 +1,19 @@
+    Debug [ignore::gitignore] opened gitignore file: /tmp/.gitignore
+    Debug [globset] built glob set; 0 literals, 2 basenames, 0 extensions, 0 prefixes, 0 suffixes, 0 required extensions, 0 regexes
+    Debug [ignore::gitignore] opened gitignore file: /home/tj/Documents/Anarchy-Inference/.gitignore
+    Debug [globset] built glob set; 1 literals, 0 basenames, 0 extensions, 0 prefixes, 0 suffixes, 0 required extensions, 0 regexes
+    Debug [ignore::gitignore] opened gitignore file: /home/tj/Documents/Anarchy-Inference/.git/info/exclude
+    Trace [mio::poll] registering event source with poller: token=Token(0), interests=READABLE
+    Trace [notify::inotify] adding inotify watch: /home/tj/Documents/Anarchy-Inference/backend/Cargo.toml
+    Trace [notify::inotify] inotify event: Event { wd: WatchDescriptor { id: 1, fd: (Weak) }, mask: EventMask(OPEN), cookie: 0, name: None }
+    Trace [notify_debouncer_full] raw event: Event { kind: Access(Open(Any)), paths: ["/home/tj/Documents/Anarchy-Inference/backend/Cargo.toml"], attr:tracker: None, attr:flag: None, attr:info: None, attr:source: None }
+    Running [tauri_cli::helpers] beforeBuildCommand `cd ./../frontend && trunk build`
+    Trace [os_info::imp] linux::current_platform is called
+    Trace [os_info::imp::lsb_release] lsb_release command returned Output { status: ExitStatus(unix_wait_status(0)), stdout: "Distributor ID:\tUbuntu\nDescription:\tUbuntu 24.10\nRelease:\t24.10\nCodename:\toracular\n", stderr: "" }
+    Trace [os_info::imp::lsb_release] Trying to parse "Distributor ID:\tUbuntu\nDescription:\tUbuntu 24.10\nRelease:\t24.10\nCodename:\toracular\n"
+    Trace [os_info::imp::lsb_release] Parsed as 'Some("Ubuntu")' distribution and 'Some("24.10")' version
+    Trace [os_info::imp] Returning Info { os_type: Ubuntu, version: Semantic(24, 10, 0), edition: None, codename: Some("oracular"), bitness: X64, architecture: Some("x86_64") }
+    Debug [tauri_cli::helpers] Setting environment for hook {"TAURI_ENV_ARCH": "x86_64", "TAURI_ENV_PLATFORM": "linux", "TAURI_ENV_TARGET_TRIPLE": "x86_64-unknown-linux-gnu", "TAURI_ENV_FAMILY": "unix", "TAURI_ENV_PLATFORM_VERSION": "24.10.0"}
+    Running [tauri_cli] Command `sh  -c cd ./../frontend && trunk build`
+sh: 1: cd: can't cd to ./../frontend
+    Error [tauri_cli] beforeBuildCommand `cd ./../frontend && trunk build` failed with exit code 2

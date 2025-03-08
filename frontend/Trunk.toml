@@ -1,0 +1,16 @@
+[build]
+target = "index.html"
+dist = "dist"
+release = false
+
+[watch]
+ignore = ["dist/**"]
+
+[serve]
+address = "127.0.0.1"
+port = 8080
+
+[[hooks]]
+stage = "build"
+command = "sh"
+command_arguments = ["-c", "mkdir -p dist"]

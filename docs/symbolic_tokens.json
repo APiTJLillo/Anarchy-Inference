@@ -1,0 +1,72 @@
+{
+  "tokens": [
+    {
+      "symbol": "λ",
+      "description": "Defines a library or lambda expression"
+    },
+    {
+      "symbol": "ƒ",
+      "description": "Defines a function"
+    },
+    {
+      "symbol": "ι",
+      "description": "Declares a variable"
+    },
+    {
+      "symbol": "⬢",
+      "description": "UI namespace"
+    },
+    {
+      "symbol": "□",
+      "description": "Creates a window"
+    },
+    {
+      "symbol": "⬚",
+      "description": "Creates a text element"
+    },
+    {
+      "symbol": "⚈",
+      "description": "Creates a button"
+    },
+    {
+      "symbol": "⌸",
+      "description": "Creates an input field"
+    },
+    {
+      "symbol": "⟳",
+      "description": "Updates text content"
+    },
+    {
+      "symbol": "+",
+      "description": "Addition or string concatenation operator"
+    },
+    {
+      "symbol": "-",
+      "description": "Subtraction operator"
+    },
+    {
+      "symbol": "*",
+      "description": "Multiplication operator"
+    },
+    {
+      "symbol": "/",
+      "description": "Division operator"
+    },
+    {
+      "symbol": "=",
+      "description": "Assignment operator"
+    },
+    {
+      "symbol": ";",
+      "description": "Statement terminator"
+    },
+    {
+      "symbol": "⊤",
+      "description": "Boolean true value"
+    },
+    {
+      "symbol": "⊥",
+      "description": "Boolean false value"
+    }
+  ]
+}

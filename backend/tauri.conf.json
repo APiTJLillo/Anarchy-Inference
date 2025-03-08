@@ -1,0 +1,45 @@
+{
+  "$schema": "https://raw.githubusercontent.com/tauri-apps/tauri/v1.3.0/tooling/bundler/schema.json",
+  "identifier": "com.anarchy-inference.dev",
+  "productName": "Anarchy Inference",
+  "version": "0.1.0",
+  "build": {
+    "beforeDevCommand": "cd /home/tj/Documents/Anarchy-Inference/frontend && trunk serve",
+    "beforeBuildCommand": "cd /home/tj/Documents/Anarchy-Inference/frontend && trunk build",
+    "frontendDist": "/home/tj/Documents/Anarchy-Inference/frontend/dist"
+  },
+  "app": {
+    "security": {
+      "csp": null
+    },
+    "windows": [
+      {
+        "label": "main",
+        "title": "Anarchy Inference",
+        "width": 1024,
+        "height": 768,
+        "resizable": true,
+        "fullscreen": false,
+        "decorations": true
+      }
+    ]
+  },
+  "bundle": {
+      "active": true,
+      "targets": [
+        "deb",
+        "appimage",
+        "msi",
+        "app",
+        "dmg"
+      ],
+      "publisher": "Anarchy Inference",
+      "icon": [
+        "icons/32x32.png",
+        "icons/128x128.png",
+        "icons/128x128@2x.png",
+        "icons/icon.icns",
+        "icons/icon.ico"
+      ]
+    }
+}

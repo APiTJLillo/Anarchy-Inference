@@ -1,0 +1,128 @@
+.anarchy-app {
+    font-family: system-ui, -apple-system, sans-serif;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #1e1e1e;
+    margin: 0;
+    padding: 0;
+}
+
+.anarchy-window {
+    background: #2d2d2d;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    position: relative;
+}
+
+.anarchy-window-title {
+    background: #3d3d3d;
+    color: #ffffff;
+    padding: 12px;
+    font-weight: bold;
+    border-bottom: 1px solid #4d4d4d;
+    user-select: none;
+    cursor: move;
+}
+
+.anarchy-window-content {
+    padding: 16px;
+}
+
+.anarchy-text {
+    color: #ffffff;
+    margin: 8px 0;
+}
+
+.anarchy-button {
+    background: #0078d4;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin: 8px 0;
+    transition: background 0.2s;
+}
+
+.anarchy-button:hover {
+    background: #106ebe;
+}
+
+.anarchy-input {
+    background: #3d3d3d;
+    color: white;
+    border: 1px solid #4d4d4d;
+    padding: 8px;
+    border-radius: 4px;
+    margin: 8px 0;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.anarchy-input::placeholder {
+    color: #888888;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background: #1e1e1e;
+}
+
+.editor-section {
+    margin: 16px 0;
+    width: 100%;
+}
+
+.code-editor {
+    width: 100%;
+    min-height: 200px;
+    background: #1e1e1e;
+    color: #d4d4d4;
+    border: 1px solid #3d3d3d;
+    border-radius: 4px;
+    padding: 12px;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 14px;
+    line-height: 1.5;
+    resize: vertical;
+    margin: 8px 0;
+}
+
+.code-editor:focus {
+    outline: none;
+    border-color: #0078d4;
+}
+
+.error-section {
+    margin-top: 16px;
+    padding: 12px;
+    background: rgba(255, 0, 0, 0.1);
+    border-left: 4px solid #ff0000;
+    border-radius: 4px;
+}
+
+.result-section {
+    margin-top: 16px;
+    padding: 12px;
+    background: rgba(0, 255, 0, 0.1);
+    border-left: 4px solid #00ff00;
+    border-radius: 4px;
+}
+
+.result-output {
+    background: #2d2d2d;
+    padding: 12px;
+    border-radius: 4px;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 14px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    color: #d4d4d4;
+    margin: 8px 0 0 0;
+} 

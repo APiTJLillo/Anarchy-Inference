@@ -1,0 +1,60 @@
+{
+    "name": "Minimal LLM",
+    "scopeName": "source.minimal-llm",
+    "patterns": [
+        {
+            "include": "#keywords"
+        },
+        {
+            "include": "#strings"
+        },
+        {
+            "include": "#comments"
+        },
+        {
+            "include": "#symbols"
+        }
+    ],
+    "repository": {
+        "keywords": {
+            "patterns": [
+                {
+                    "name": "keyword.control.minimal-llm",
+                    "match": "[λƒ]"
+                }
+            ]
+        },
+        "strings": {
+            "name": "string.quoted.double.minimal-llm",
+            "begin": "\"",
+            "end": "\"",
+            "patterns": [
+                {
+                    "name": "constant.character.escape.minimal-llm",
+                    "match": "\\\\."
+                }
+            ]
+        },
+        "comments": {
+            "patterns": [
+                {
+                    "name": "comment.line.double-slash.minimal-llm",
+                    "match": "//.*$"
+                },
+                {
+                    "name": "comment.block.minimal-llm",
+                    "begin": "/\\*",
+                    "end": "\\*/"
+                }
+            ]
+        },
+        "symbols": {
+            "patterns": [
+                {
+                    "name": "constant.character.minimal-llm",
+                    "match": "[⬢□⬚✎⌨∇⌽]"
+                }
+            ]
+        }
+    }
+} 
