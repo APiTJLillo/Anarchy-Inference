@@ -82,7 +82,7 @@ impl Network {
             "POST" => self.http_client.post(url),
             "PUT" => self.http_client.put(url),
             "DELETE" => self.http_client.delete(url),
-            _ => return Err(LangError::NetworkError("Invalid HTTP method".to_string()))
+            _ => return Err(LangError::network_error("Invalid HTTP method"))
         };
 
         if let Some(body) = body {
@@ -99,16 +99,22 @@ impl Network {
             request = request.headers(header_map);
         }
 
-        let response = request.send().await.map_err(|e| LangError::NetworkError(e.to_string()))?;
-        let text = response.text().await.map_err(|e| LangError::NetworkError(e.to_string()))?;
+        let response = request.send().await.map_err(|e| LangError::network_error(&e.to_string()))?;
+        let text = response.text().await.map_err(|e| LangError::network_error(&e.to_string()))?;
         
         Ok(text)
     }
 
     pub async fn connect_websocket(&self, url: &str) -> Result<(), LangError> {
-        let (ws_stream, _) = tokio_tungstenite::connect_async(&url)
+        // Create a TCP connection first
+        let stream = TcpStream::connect(url)
             .await
-            .map_err(|e| LangError::NetworkError(e.to_string()))?;
+            .map_err(|e| LangError::network_error(&e.to_string()))?;
+        
+        // Then create WebSocket from TCP stream
+        let ws_stream = tokio_tungstenite::accept_async(stream)
+            .await
+            .map_err(|e| LangError::network_error(&e.to_string()))?;
 
         let mut connections = self.ws_connections.lock().await;
         connections.insert(url.to_string(), ws_stream);
@@ -121,10 +127,10 @@ impl Network {
         if let Some(ws_stream) = connections.get_mut(url) {
             ws_stream.send(Message::Text(message.to_string()))
                 .await
-                .map_err(|e| LangError::NetworkError(e.to_string()))?;
+                .map_err(|e| LangError::network_error(&e.to_string()))?;
             Ok(())
         } else {
-            Err(LangError::NetworkError("WebSocket not connected".to_string()))
+            Err(LangError::network_error("WebSocket not connected"))
         }
     }
 
@@ -133,20 +139,20 @@ impl Network {
         if let Some(mut ws_stream) = connections.remove(url) {
             ws_stream.close(None)
                 .await
-                .map_err(|e| LangError::NetworkError(e.to_string()))?;
+                .map_err(|e| LangError::network_error(&e.to_string()))?;
             Ok(())
         } else {
-            Err(LangError::NetworkError("WebSocket not connected".to_string()))
+            Err(LangError::network_error("WebSocket not connected"))
         }
     }
 
     pub async fn listen(&self, port: u16) -> Result<Arc<TcpListener>, LangError> {
         let _permit = self.connection_pool.acquire().await
-            .map_err(|e| LangError::NetworkError(e.to_string()))?;
+            .map_err(|e| LangError::network_error(&e.to_string()))?;
 
         let listener = TcpListener::bind(format!("127.0.0.1:{}", port))
             .await
-            .map_err(|e| LangError::NetworkError(e.to_string()))?;
+            .map_err(|e| LangError::network_error(&e.to_string()))?;
 
         let listener = Arc::new(listener);
         self.connections.lock().await.insert(port, Arc::clone(&listener));
@@ -162,10 +168,10 @@ impl Network {
     ) -> Result<(), LangError> {
         let ws_stream = match tokio_tungstenite::accept_async(stream).await {
             Ok(ws_stream) => ws_stream,
-            Err(e) => return Err(LangError::NetworkError(e.to_string()))
+            Err(e) => return Err(LangError::network_error(&e.to_string()))
         };
 
-        let (mut write, half) = ws_stream.split();
+        let (mut write, mut half) = ws_stream.split();
 
         while let Some(msg) = half.next().await {
             let msg = match msg {
@@ -225,7 +231,7 @@ impl Network {
         if let Some(_) = connections.remove(&port) {
             Ok(())
         } else {
-            Err(LangError::NetworkError("Port not found".to_string()))
+            Err(LangError::network_error("Port not found"))
         }
     }
 }

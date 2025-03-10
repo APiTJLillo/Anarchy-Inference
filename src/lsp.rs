@@ -45,7 +45,6 @@ impl LspState {
     fn get_completion_items(&self, _line: &str, _character: usize) -> Vec<CompletionItem> {
         let mut items = Vec::new();
 
-        // Add some basic keywords
         items.push(CompletionItem {
             label: "function".to_string(),
             kind: Some(CompletionItemKind::KEYWORD),
@@ -63,12 +62,13 @@ impl LspState {
         items
     }
 
-    async fn analyze_and_report_diagnostics(&self, uri: &Url, content: &str) {
+    async fn analyze_and_report_diagnostics(&self, uri: &Url, content: String) {
         let mut diagnostics = Vec::new();
 
         // Parse and check for syntax errors
-        let lexer = Lexer::new(content);
-        match Parser::new(lexer).parse() {
+        let mut lexer = Lexer::new(content.to_string());
+        let tokens = lexer.tokenize().unwrap_or_default();
+        match Parser::new(tokens).parse() {
             Ok(_) => {
                 // Parsing successful - could add semantic analysis here
             }
@@ -143,44 +143,67 @@ impl LanguageServer for LspState {
         let text = params.text_document.text;
 
         self.documents.lock().insert(uri.clone(), text.clone());
-        self.analyze_and_report_diagnostics(&uri, &text).await;
+        self.analyze_and_report_diagnostics(&uri, text).await;
     }
 
     async fn did_change(&self, params: DidChangeTextDocumentParams) {
-        let uri = params.text_document.uri;
+        let uri = params.text_document.uri.clone();
+        let mut content = String::new();
         
-        if let Some(content) = self.documents.lock().get_mut(&uri) {
-            for change in params.content_changes {
-                if let Some(range) = change.range {
-                    let start_pos = self.position_to_index(content, range.start);
-                    let end_pos = self.position_to_index(content, range.end);
-                    content.replace_range(start_pos..end_pos, &change.text);
-                } else {
-                    *content = change.text;
+        {
+            let mut documents = self.documents.lock();
+            if let Some(doc_content) = documents.get_mut(&uri) {
+                for change in params.content_changes {
+                    if let Some(range) = change.range {
+                        let start_pos = self.position_to_index(doc_content, range.start);
+                        let end_pos = self.position_to_index(doc_content, range.end);
+                        doc_content.replace_range(start_pos..end_pos, &change.text);
+                    } else {
+                        *doc_content = change.text;
+                    }
                 }
+                content = doc_content.clone();
             }
+        }
+
+        if !content.is_empty() {
             self.analyze_and_report_diagnostics(&uri, content).await;
         }
     }
 
     async fn did_save(&self, params: DidSaveTextDocumentParams) {
-        if let Some(content) = self.documents.lock().get(&params.text_document.uri) {
-            self.analyze_and_report_diagnostics(&params.text_document.uri, content).await;
+        let uri = params.text_document.uri.clone();
+        let content = {
+            self.documents.lock()
+                .get(&uri)
+                .map(|s| s.clone())
+        };
+        
+        if let Some(content) = content {
+            self.analyze_and_report_diagnostics(&uri, content).await;
         }
     }
 
     async fn completion(&self, params: CompletionParams) -> Result<Option<CompletionResponse>> {
-        if let Some(doc) = self.documents.lock().get(&params.text_document_position.text_document.uri) {
-            let items = self.get_completion_items(doc, params.text_document_position.position.character as usize);
-            if !items.is_empty() {
-                return Ok(Some(CompletionResponse::Array(items)));
-            }
+        let items = {
+            let documents = self.documents.lock();
+            documents.get(&params.text_document_position.text_document.uri)
+                .map(|doc| self.get_completion_items(doc, params.text_document_position.position.character as usize))
+                .unwrap_or_default()
+        };
+
+        if !items.is_empty() {
+            return Ok(Some(CompletionResponse::Array(items)));
         }
         Ok(None)
     }
 
     async fn hover(&self, params: HoverParams) -> Result<Option<Hover>> {
-        if let Some(_) = self.documents.lock().get(&params.text_document_position_params.text_document.uri) {
+        let exists = {
+            self.documents.lock().contains_key(&params.text_document_position_params.text_document.uri)
+        };
+
+        if exists {
             Ok(Some(Hover {
                 contents: HoverContents::Markup(MarkupContent {
                     kind: MarkupKind::Markdown,
@@ -193,15 +216,15 @@ impl LanguageServer for LspState {
         }
     }
 
-    async fn goto_definition(&self, params: GotoDefinitionParams) -> Result<Option<GotoDefinitionResponse>> {
+    async fn goto_definition(&self, _params: GotoDefinitionParams) -> Result<Option<GotoDefinitionResponse>> {
         Ok(None)
     }
 
-    async fn references(&self, params: ReferenceParams) -> Result<Option<Vec<Location>>> {
+    async fn references(&self, _params: ReferenceParams) -> Result<Option<Vec<Location>>> {
         Ok(None)
     }
 
-    async fn document_symbol(&self, params: DocumentSymbolParams) -> Result<Option<DocumentSymbolResponse>> {
+    async fn document_symbol(&self, _params: DocumentSymbolParams) -> Result<Option<DocumentSymbolResponse>> {
         Ok(None)
     }
 }

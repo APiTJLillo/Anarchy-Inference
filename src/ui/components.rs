@@ -1,17 +1,7 @@
 use yew::prelude::*;
-use std::rc::Rc;
-use std::cell::RefCell;
-use std::collections::HashMap;
 use crate::interpreter::Interpreter;
 use crate::parser::Parser;
 use crate::lexer::Lexer;
-
-// Global state for UI components
-#[derive(Default)]
-struct GlobalState {
-    variables: Rc<RefCell<HashMap<String, String>>>,
-    history: Rc<RefCell<Vec<String>>>
-}
 
 #[derive(Properties, PartialEq)]
 pub struct WindowProps {
@@ -61,7 +51,7 @@ pub fn button(props: &ButtonProps) -> Html {
 #[derive(Properties, PartialEq)]
 pub struct InputProps {
     pub value: String,
-    pub onchange: Callback<InputEvent>,
+    pub onchange: Callback<Event>,
     pub placeholder: String
 }
 
@@ -84,7 +74,7 @@ pub fn editor() -> Html {
 
     let onchange = {
         let input_value = input_value.clone();
-        Callback::from(move |e: InputEvent| {
+        Callback::from(move |e: Event| {
             let target = e.target_unchecked_into::<web_sys::HtmlInputElement>();
             input_value.set(target.value());
         })
@@ -96,13 +86,14 @@ pub fn editor() -> Html {
         
         Callback::from(move |_| {
             let code = (*input_value).clone();
-            let mut lexer = Lexer::new(&code);
-            let mut parser = Parser::new(lexer);
+            let mut lexer = Lexer::new(code.clone());
+            let tokens = lexer.tokenize().unwrap_or_default();
+            let mut parser = Parser::new(tokens);
             let mut interpreter = Interpreter::new();
             
             match parser.parse() {
                 Ok(ast) => {
-                    match interpreter.interpret(ast) {
+                    match interpreter.interpret(&[ast]) {
                         Ok(result) => {
                             output_value.set(format!("Result: {:?}", result));
                         }

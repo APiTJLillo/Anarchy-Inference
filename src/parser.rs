@@ -53,7 +53,7 @@ impl Parser {
         nodes.into_iter().next().ok_or_else(|| LangError::syntax_error("Empty program"))
     }
 
-    fn parse_program(&mut self) -> Result<Vec<ASTNode>, LangError> {
+    pub fn parse_program(&mut self) -> Result<Vec<ASTNode>, LangError> {
         let mut nodes = Vec::new();
 
         while let Ok(token_info) = self.current_token() {
@@ -107,7 +107,6 @@ impl Parser {
                             },
                             Token::SymbolicKeyword('ƒ') => {
                                 // Parse function declaration
-                                self.advance(); // consume ƒ
                                 let func = self.parse_function_declaration()?;
                                 functions.push(func);
 
@@ -140,6 +139,11 @@ impl Parser {
                         line,
                         column,
                     });
+                },
+                Token::SymbolicKeyword('ƒ') => {
+                    // Parse function declaration
+                    let func = self.parse_function_declaration()?;
+                    nodes.push(func);
                 },
                 _ => {
                     let stmt = self.parse_statement()?;
@@ -201,7 +205,6 @@ impl Parser {
                         },
                         Token::SymbolicKeyword('ƒ') => {
                             // Parse function declaration
-                            self.advance(); // consume ƒ
                             let func = self.parse_function_declaration()?;
                             functions.push(func);
 
@@ -535,6 +538,9 @@ impl Parser {
     }
 
     fn parse_variable_declaration(&mut self) -> Result<ASTNode, LangError> {
+        // Skip the 'ι' token
+        self.advance();
+
         let token_info = self.current.as_ref()
             .ok_or_else(|| LangError::syntax_error("Unexpected end of input"))?;
         let line = token_info.line;
@@ -568,17 +574,36 @@ impl Parser {
     }
 
     fn parse_block(&mut self) -> Result<ASTNode, LangError> {
-        let token_info = self.current.as_ref()
-            .ok_or_else(|| LangError::syntax_error("Unexpected end of input"))?;
+        debug!("Entering parse_block, current token: {:?}", self.current);
+        
+        // Get position info from the current token but don't consume it yet
+        let token_info = match &self.current {
+            Some(info) => info.clone(),
+            None => return Err(LangError::syntax_error("Unexpected end of input")),
+        };
+        
         let line = token_info.line;
         let column = token_info.column;
-
-        let mut statements = Vec::new();
         
-        // Skip the opening brace if we haven't consumed it yet
-        if let Token::CurlyBrace('{') = token_info.token {
-            self.advance();
-        }
+        debug!("Token at start of block: {:?} at line {} column {}", token_info.token, line, column);
+        
+        let mut statements = Vec::new();
+
+        // Check for opening brace and consume it
+        match token_info.token {
+            Token::CurlyBrace('{') => {
+                debug!("Found opening brace at line {} column {}", line, column);
+                self.advance();
+            },
+            _ => {
+                debug!("Missing opening brace, found: {:?}", token_info.token);
+                return Err(LangError::syntax_error_with_location(
+                    &format!("Expected '{{', found {:?}", token_info.token),
+                    line,
+                    column,
+                ));
+            }
+        };
 
         loop {
             match &self.current {
@@ -590,7 +615,7 @@ impl Parser {
                     // Parse any valid statement or expression
                     let statement = match token {
                         Token::SymbolicKeyword('λ') => self.parse_lambda()?,
-                        Token::SymbolicKeyword('ƒ') => self.parse_statement()?,
+                        Token::SymbolicKeyword('ƒ') => self.parse_function_declaration()?,
                         Token::Identifier(_) | Token::SymbolicKeyword(_) => {
                             let expr = self.parse_expression()?;
                             // Check for semicolon after expression
@@ -794,58 +819,77 @@ impl Parser {
     }
 
     fn parse_function_declaration(&mut self) -> Result<ASTNode, LangError> {
+        // Start position is from the current token
         let start_token = self.current_token()?.clone();
 
-        // Next token: either SymbolicKeyword(...) or Identifier(...) for the function name
-        let name_token = self.current.as_ref()
-            .ok_or_else(|| LangError::syntax_error("Expected function name after 'ƒ'"))?;
+        // First token should be 'ƒ'
+        match &start_token.token {
+            Token::SymbolicKeyword('ƒ') => self.advance(),
+            _ => return Err(LangError::syntax_error("Expected 'ƒ' at start of function declaration")),
+        }
 
-        let func_name = match &name_token.token {
-            Token::Identifier(id) => id.clone(),
+        // Parse function name
+        let name_token = self.current_token()?.clone();
+
+        let func_name = match name_token.token {
+            Token::Identifier(id) => id,
             Token::SymbolicKeyword(ch) => ch.to_string(),
             _ => return Err(LangError::syntax_error("Invalid function name")),
         };
-        self.advance();
+        self.advance(); // Move past function name
 
-        // Now parse parameters: (p1, p2, ...)
+        // Parse parameters: (p1, p2, ...)
         let mut params = Vec::new();
         if let Some(TokenInfo { token: Token::Parenthesis('('), .. }) = &self.current {
             self.advance(); // Skip opening parenthesis
-            
-            if let Some(TokenInfo { token: Token::Parenthesis(')'), .. }) = &self.current {
-                self.advance(); // Empty parameter list
-            } else {
-                loop {
-                    match &self.current {
-                        Some(TokenInfo { token: Token::Identifier(name), .. }) => {
-                            params.push(name.clone());
-                            self.advance();
-                        },
-                        Some(TokenInfo { token: Token::SymbolicKeyword(c), .. }) => {
-                            params.push(c.to_string());
-                            self.advance();
-                        },
-                        _ => return Err(LangError::syntax_error("Expected parameter name")),
-                    }
+        } else {
+            return Err(LangError::syntax_error("Expected '(' after function name"));
+        }
+        
+        if let Some(TokenInfo { token: Token::Parenthesis(')'), .. }) = &self.current {
+            self.advance(); // Empty parameter list
+        } else {
+            loop {
+                match &self.current {
+                    Some(TokenInfo { token: Token::Identifier(name), .. }) => {
+                        params.push(name.clone());
+                        self.advance();
+                    },
+                    Some(TokenInfo { token: Token::SymbolicKeyword(c), .. }) => {
+                        params.push(c.to_string());
+                        self.advance();
+                    },
+                    _ => return Err(LangError::syntax_error("Expected parameter name")),
+                }
 
-                    match &self.current {
-                        Some(TokenInfo { token: Token::Parenthesis(')'), .. }) => {
-                            self.advance();
-                            break;
-                        },
-                        Some(TokenInfo { token: Token::Comma, .. }) => {
-                            self.advance();
-                            continue;
-                        },
-                        _ => return Err(LangError::syntax_error("Expected ',' or ')' in parameter list")),
-                    }
+                match &self.current {
+                    Some(TokenInfo { token: Token::Parenthesis(')'), .. }) => {
+                        self.advance();
+                        break;
+                    },
+                    Some(TokenInfo { token: Token::Comma, .. }) => {
+                        self.advance();
+                        continue;
+                    },
+                    _ => return Err(LangError::syntax_error("Expected ',' or ')' in parameter list")),
                 }
             }
         }
 
-        // Expect a block { ... } for the body
+        // Parse the function body
         match &self.current {
-            Some(TokenInfo { token: Token::CurlyBrace('{'), .. }) => {
+            Some(token_info) => {
+                debug!("Current token before block: {:?}", token_info.token);
+                
+                // Make sure we have a curly brace
+                if !matches!(token_info.token, Token::CurlyBrace('{')) {
+                    return Err(LangError::syntax_error_with_location(
+                        &format!("Expected '{{' before function body, found {:?}", token_info.token),
+                        token_info.line,
+                        token_info.column,
+                    ));
+                }
+                
                 let body = self.parse_block()?;
                 Ok(ASTNode {
                     node_type: NodeType::FunctionDeclaration {
@@ -857,7 +901,7 @@ impl Parser {
                     column: start_token.column,
                 })
             },
-            _ => Err(LangError::syntax_error("Expected '{' for function body")),
+            None => Err(LangError::syntax_error("Unexpected end of input")),
         }
     }
 }
@@ -964,34 +1008,12 @@ mod tests {
     #[test]
     fn test_parse_function_declaration() {
         let tokens = vec![
-            TokenInfo {
-                token: Token::SymbolicKeyword('ƒ'),
-                line: 1,
-                column: 1,
-                start_pos: 0,
-                end_pos: 1,
-            },
-            TokenInfo {
-                token: Token::Identifier("test".to_string()),
-                line: 1,
-                column: 2,
-                start_pos: 1,
-                end_pos: 5,
-            },
-            TokenInfo {
-                token: Token::CurlyBrace('{'),
-                line: 1,
-                column: 6,
-                start_pos: 5,
-                end_pos: 6,
-            },
-            TokenInfo {
-                token: Token::CurlyBrace('}'),
-                line: 1,
-                column: 7,
-                start_pos: 6,
-                end_pos: 7,
-            },
+            TokenInfo { token: Token::SymbolicKeyword('ƒ'), line: 1, column: 1, start_pos: 0, end_pos: 1 },
+            TokenInfo { token: Token::Identifier("test".to_string()), line: 1, column: 3, start_pos: 2, end_pos: 6 },
+            TokenInfo { token: Token::Parenthesis('('), line: 1, column: 7, start_pos: 6, end_pos: 7 },
+            TokenInfo { token: Token::Parenthesis(')'), line: 1, column: 8, start_pos: 7, end_pos: 8 },
+            TokenInfo { token: Token::CurlyBrace('{'), line: 1, column: 10, start_pos: 9, end_pos: 10 },
+            TokenInfo { token: Token::CurlyBrace('}'), line: 1, column: 11, start_pos: 10, end_pos: 11 },
         ];
         let mut parser = Parser::new(tokens);
         let result = parser.parse_program().unwrap();

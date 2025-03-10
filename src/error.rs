@@ -151,6 +151,15 @@ impl LangError {
         }
     }
 
+    pub fn network_error(message: &str) -> Self {
+        LangError {
+            error_type: ErrorType::IO,  // Using IO type for network errors
+            message: message.to_string(),
+            location: None,
+            stack_trace: Vec::new(),
+        }
+    }
+
     pub fn with_stack_trace(mut self, stack_trace: Vec<StackFrame>) -> Self {
         self.stack_trace = stack_trace;
         self
@@ -282,4 +291,4 @@ mod tests {
         assert_eq!(error.stack_trace.len(), 1);
         assert_eq!(error.stack_trace[0].function, "main");
     }
-} 
+}

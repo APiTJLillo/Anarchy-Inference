@@ -2,9 +2,9 @@ use crate::error::LangError;
 use crate::lexer::Lexer;
 use crate::parser::Parser;
 use crate::interpreter::Interpreter;
+use crate::ui::App;
 use std::fs;
 use log::debug;
-use anarchy_inference::ui::YewApp;
 
 mod ast;
 mod lexer;
@@ -16,8 +16,10 @@ mod concurrency;
 mod lsp;
 mod ui;
 mod semantic;
+mod value;
 
-fn main() -> Result<(), LangError> {
+#[tokio::main]
+async fn main() -> Result<(), LangError> {
     env_logger::init();
 
     let args: Vec<String> = std::env::args().collect();
@@ -37,6 +39,8 @@ fn main() -> Result<(), LangError> {
     let mut interpreter = Interpreter::new();
     interpreter.interpret(&ast)?;
 
-    yew::Renderer::<YewApp>::new().render();
+    // Initialize Yew app
+    yew::Renderer::<App>::new().render();
+    
     Ok(())
 }

@@ -46,6 +46,8 @@ pub struct TokenInfo {
     pub token: Token,
     pub line: usize,
     pub column: usize,
+    pub start_pos: usize,
+    pub end_pos: usize,
 }
 
 /// A safer Lexer that stores the entire input as a `Vec<char>` and tracks
@@ -90,6 +92,8 @@ impl Lexer {
                         token: Token::EOF,
                         line: self.line,
                         column: self.column,
+                        start_pos: self.position,
+                        end_pos: self.position,
                     });
                 }
                 break;
@@ -109,11 +113,14 @@ impl Lexer {
                 token: Token::EOF,
                 line: self.line,
                 column: self.column,
+                start_pos: self.position,
+                end_pos: self.position,
             }));
         }
 
         let start_line = self.line;
         let start_column = self.column;
+        let start_pos = self.position;
 
         let c = match self.current_char() {
             Some(ch) => ch,
@@ -204,6 +211,8 @@ impl Lexer {
             token,
             line: start_line,
             column: start_column,
+            start_pos,
+            end_pos: self.position,
         }))
     }
 
@@ -316,6 +325,8 @@ mod tests {
         let tokens = lexer.tokenize().unwrap();
         assert_eq!(tokens.len(), 2); // 123 + EOF
         assert_eq!(tokens[0].token, Token::Number(123));
+        assert_eq!(tokens[0].start_pos, 0);
+        assert_eq!(tokens[0].end_pos, 3);
         assert!(matches!(tokens[1].token, Token::EOF));
     }
 
