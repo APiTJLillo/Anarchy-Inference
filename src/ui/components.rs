@@ -93,7 +93,7 @@ pub fn editor() -> Html {
             
             match parser.parse() {
                 Ok(ast) => {
-                    match interpreter.interpret(&[ast]) {
+                    match interpreter.execute(&[ast]) {
                         Ok(result) => {
                             output_value.set(format!("Result: {:?}", result));
                         }
