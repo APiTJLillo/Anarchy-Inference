@@ -15,6 +15,10 @@ pub struct GarbageCollector {
     potential_cycles: Mutex<HashSet<usize>>,
     // Statistics for memory management
     stats: Mutex<GcStats>,
+    // Threshold for automatic collection
+    collection_threshold: Mutex<usize>,
+    // Flag to enable/disable automatic collection
+    auto_collect_enabled: Mutex<bool>,
 }
 
 /// Object tracked by the garbage collector
@@ -30,6 +34,8 @@ struct GcObject {
     ref_count: usize,
     // Mark for cycle detection
     marked: bool,
+    // Size of the object in bytes (approximate)
+    size: usize,
 }
 
 impl GarbageCollector {
@@ -39,7 +45,32 @@ impl GarbageCollector {
             objects: Mutex::new(HashMap::new()),
             potential_cycles: Mutex::new(HashSet::new()),
             stats: Mutex::new(GcStats::default()),
+            collection_threshold: Mutex::new(1024 * 1024), // 1MB default threshold
+            auto_collect_enabled: Mutex::new(true),
         }
+    }
+
+    /// Create a new garbage collector with custom settings
+    pub fn with_settings(threshold: usize, auto_collect: bool) -> Self {
+        GarbageCollector {
+            objects: Mutex::new(HashMap::new()),
+            potential_cycles: Mutex::new(HashSet::new()),
+            stats: Mutex::new(GcStats::default()),
+            collection_threshold: Mutex::new(threshold),
+            auto_collect_enabled: Mutex::new(auto_collect),
+        }
+    }
+
+    /// Set the collection threshold
+    pub fn set_collection_threshold(&self, threshold: usize) {
+        let mut collection_threshold = self.collection_threshold.lock().unwrap();
+        *collection_threshold = threshold;
+    }
+
+    /// Enable or disable automatic collection
+    pub fn set_auto_collect(&self, enabled: bool) {
+        let mut auto_collect_enabled = self.auto_collect_enabled.lock().unwrap();
+        *auto_collect_enabled = enabled;
     }
 
     /// Allocate a new value in the garbage collector
@@ -50,6 +81,9 @@ impl GarbageCollector {
         // Generate a unique ID for this object
         let id = stats.allocations + stats.deallocations + 1;
         
+        // Calculate approximate size of the object
+        let size = self.calculate_object_size(&value);
+        
         // Create the GC object
         let gc_object = GcObject {
             id,
@@ -57,11 +91,12 @@ impl GarbageCollector {
             references: HashSet::new(),
             ref_count: 1, // Initial reference count is 1
             marked: false,
+            size,
         };
         
         // Update statistics
         stats.allocations += 1;
-        stats.total_memory += std::mem::size_of::<GcObject>();
+        stats.total_memory += size;
         
         // Store the object
         objects.insert(id, gc_object);
@@ -72,10 +107,57 @@ impl GarbageCollector {
             potential_cycles.insert(id);
         }
         
+        // Check if we should perform automatic collection
+        drop(objects); // Release lock before potential collection
+        drop(stats);   // Release lock before potential collection
+        self.check_auto_collect();
+        
         // Create and return the GcValue
         GcValue {
             id,
             gc: Arc::new(self.clone()),
+        }
+    }
+    
+    /// Calculate the approximate size of an object in bytes
+    fn calculate_object_size(&self, value: &GcValueImpl) -> usize {
+        match value {
+            GcValueImpl::Object(map) => {
+                // Base size + size of each key-value pair
+                std::mem::size_of::<GcValueImpl>() + 
+                map.len() * (std::mem::size_of::<String>() + std::mem::size_of::<crate::core::value::Value>())
+            },
+            GcValueImpl::Array(items) => {
+                // Base size + size of each element
+                std::mem::size_of::<GcValueImpl>() + 
+                items.len() * std::mem::size_of::<crate::core::value::Value>()
+            },
+            GcValueImpl::Function { .. } => {
+                // Functions are more complex, use a reasonable estimate
+                std::mem::size_of::<GcValueImpl>() + 256
+            },
+            // Add other complex types as needed
+        }
+    }
+    
+    /// Check if automatic collection should be performed
+    fn check_auto_collect(&self) {
+        let auto_collect_enabled = self.auto_collect_enabled.lock().unwrap();
+        if !*auto_collect_enabled {
+            return;
+        }
+        
+        let stats = self.stats.lock().unwrap();
+        let threshold = self.collection_threshold.lock().unwrap();
+        
+        if stats.total_memory > *threshold {
+            // Drop locks before collection to avoid deadlock
+            drop(stats);
+            drop(threshold);
+            drop(auto_collect_enabled);
+            
+            // Perform collection
+            self.collect();
         }
     }
     
@@ -140,10 +222,10 @@ impl GarbageCollector {
         
         // Remove them
         for id in to_remove {
-            if let Some(_obj) = objects.remove(&id) {
+            if let Some(obj) = objects.remove(&id) {
                 stats.deallocations += 1;
                 stats.cycles_detected += 1;
-                stats.total_memory -= std::mem::size_of::<GcObject>();
+                stats.total_memory -= obj.size;
                 
                 // Also remove from potential cycles
                 potential_cycles.remove(&id);
@@ -236,9 +318,9 @@ impl GarbageCollector {
         
         // Remove them
         for id in to_remove {
-            if let Some(_obj) = objects.remove(&id) {
+            if let Some(obj) = objects.remove(&id) {
                 stats.deallocations += 1;
-                stats.total_memory -= std::mem::size_of::<GcObject>();
+                stats.total_memory -= obj.size;
                 
                 // Also remove from potential cycles
                 let mut potential_cycles = self.potential_cycles.lock().unwrap();
@@ -261,6 +343,29 @@ impl GarbageCollector {
         // Sweep phase
         self.sweep_unmarked_objects();
     }
+    
+    /// Force a full garbage collection
+    pub fn force_collect(&self) {
+        self.collect();
+    }
+    
+    /// Get the current memory usage
+    pub fn memory_usage(&self) -> usize {
+        let stats = self.stats.lock().unwrap();
+        stats.total_memory
+    }
+    
+    /// Get the current collection threshold
+    pub fn get_collection_threshold(&self) -> usize {
+        let threshold = self.collection_threshold.lock().unwrap();
+        *threshold
+    }
+    
+    /// Check if automatic collection is enabled
+    pub fn is_auto_collect_enabled(&self) -> bool {
+        let enabled = self.auto_collect_enabled.lock().unwrap();
+        *enabled
+    }
 }
 
 impl Clone for GarbageCollector {
@@ -269,11 +374,15 @@ impl Clone for GarbageCollector {
         let objects = self.objects.lock().unwrap().clone();
         let potential_cycles = self.potential_cycles.lock().unwrap().clone();
         let stats = self.stats.lock().unwrap().clone();
+        let threshold = self.collection_threshold.lock().unwrap().clone();
+        let auto_collect = self.auto_collect_enabled.lock().unwrap().clone();
         
         let new_gc = GarbageCollector {
             objects: Mutex::new(objects),
             potential_cycles: Mutex::new(potential_cycles),
             stats: Mutex::new(stats),
+            collection_threshold: Mutex::new(threshold),
+            auto_collect_enabled: Mutex::new(auto_collect),
         };
         
         new_gc
