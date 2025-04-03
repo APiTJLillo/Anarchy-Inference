@@ -7,7 +7,7 @@ use crate::error::LangError;
 use std::collections::HashMap;
 use std::sync::RwLock;
 use once_cell::sync::Lazy;
-use crate::std::security;
+use crate::security;
 use crate::std::fs;
 use crate::std::shell;
 use crate::std::http;

@@ -16,6 +16,13 @@ pub struct RcValue<T: Clone> {
     inner: Rc<RefCell<T>>,
 }
 
+impl<T: Clone + PartialEq> PartialEq for RcValue<T> {
+    fn eq(&self, other: &Self) -> bool {
+        // Compare the inner values
+        *self.inner.borrow() == *other.inner.borrow()
+    }
+}
+
 impl<T: Clone> RcValue<T> {
     /// Create a new reference-counted value
     pub fn new(value: T) -> Self {
@@ -50,7 +57,7 @@ impl<T: fmt::Debug + Clone> fmt::Debug for RcValue<T> {
 }
 
 /// Types of complex values that need reference counting
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum ComplexValueType {
     Object,
     Array,
@@ -68,6 +75,25 @@ pub struct ComplexValue {
     pub array_data: Option<Vec<Value>>,
     /// Function data (if this is a function)
     pub function_data: Option<(Vec<String>, Box<ASTNode>)>,
+}
+
+// Custom implementation of PartialEq for ComplexValue to handle ASTNode
+impl PartialEq for ComplexValue {
+    fn eq(&self, other: &Self) -> bool {
+        self.value_type == other.value_type &&
+        self.object_data == other.object_data &&
+        self.array_data == other.array_data &&
+        // Skip comparing function_data since ASTNode doesn't implement PartialEq
+        match (&self.function_data, &other.function_data) {
+            (None, None) => true,
+            (Some(_), None) => false,
+            (None, Some(_)) => false,
+            (Some((self_params, _)), Some((other_params, _))) => {
+                // Compare only the parameters, not the ASTNode body
+                self_params == other_params
+            }
+        }
+    }
 }
 
 /// A reference-counted complex value
@@ -180,7 +206,7 @@ pub enum ValueType {
 }
 
 /// A value in the language
-#[derive(Clone)]
+#[derive(Clone, PartialEq)]
 pub enum Value {
     Null,
     Number(f64),
@@ -206,8 +232,8 @@ impl Value {
     }
     
     /// Create a string value
-    pub fn string(s: String) -> Self {
-        Self::String(s)
+    pub fn string<S: Into<String>>(s: S) -> Self {
+        Self::String(s.into())
     }
     
     /// Create an object value

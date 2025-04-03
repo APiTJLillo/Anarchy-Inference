@@ -2,23 +2,27 @@
 // Agent Memory for Anarchy-Inference
 
 use std::collections::HashMap;
-use std::sync::RwLock;
+use std::sync::{Arc, Mutex};
 use once_cell::sync::Lazy;
 use crate::value::Value;
 use crate::error::LangError;
 
-// Global memory storage
-static MEMORY: Lazy<RwLock<HashMap<String, Value>>> = Lazy::new(|| RwLock::new(HashMap::new()));
+// Global memory storage using thread-safe types
+// Using Arc<Mutex<>> instead of RwLock for thread-safety with Value type
+static MEMORY: Lazy<Arc<Mutex<HashMap<String, String>>>> = Lazy::new(|| Arc::new(Mutex::new(HashMap::new())));
 
 /// Set memory value
 /// Symbol: 📝 or m
 /// Usage: m("key", "val")
 pub fn set_memory(key: &str, value: Value) -> Result<Value, LangError> {
-    if let Ok(mut memory) = MEMORY.write() {
-        memory.insert(key.to_string(), value);
+    // Convert Value to String for storage
+    let value_str = format!("{}", value);
+    
+    if let Ok(mut memory) = MEMORY.lock() {
+        memory.insert(key.to_string(), value_str);
         Ok(Value::boolean(true))
     } else {
-        Err(LangError::runtime_error("Failed to acquire write lock for memory"))
+        Err(LangError::runtime_error("Failed to acquire lock for memory"))
     }
 }
 
@@ -26,14 +30,15 @@ pub fn set_memory(key: &str, value: Value) -> Result<Value, LangError> {
 /// Symbol: 📖 or n
 /// Usage: n("key") → "val"
 pub fn get_memory(key: &str) -> Result<Value, LangError> {
-    if let Ok(memory) = MEMORY.read() {
-        if let Some(value) = memory.get(key) {
-            Ok(value.clone())
+    if let Ok(memory) = MEMORY.lock() {
+        if let Some(value_str) = memory.get(key) {
+            // Return the string value directly
+            Ok(Value::string(value_str.clone()))
         } else {
             Ok(Value::null())
         }
     } else {
-        Err(LangError::runtime_error("Failed to acquire read lock for memory"))
+        Err(LangError::runtime_error("Failed to acquire lock for memory"))
     }
 }
 
@@ -41,11 +46,11 @@ pub fn get_memory(key: &str) -> Result<Value, LangError> {
 /// Symbol: 🗑 or f
 /// Usage: f("key")
 pub fn forget_memory(key: &str) -> Result<Value, LangError> {
-    if let Ok(mut memory) = MEMORY.write() {
+    if let Ok(mut memory) = MEMORY.lock() {
         memory.remove(key);
         Ok(Value::boolean(true))
     } else {
-        Err(LangError::runtime_error("Failed to acquire write lock for memory"))
+        Err(LangError::runtime_error("Failed to acquire lock for memory"))
     }
 }
 
