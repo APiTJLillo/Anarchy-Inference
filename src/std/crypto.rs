@@ -5,10 +5,11 @@ use std::fs::File;
 use std::io::{self, Read};
 use std::path::Path;
 use sha2::{Sha256, Digest};
-use md5::{Md5, Digest as Md5Digest};
+use md5::Digest as Md5Digest;
 use crate::value::Value;
 use crate::error::LangError;
-use crate::std::security::check_fs_allowed;
+// Import security module from parent directory
+use crate::security::check_path_allowed;
 
 /// Hash a string
 /// Symbol: #
@@ -22,9 +23,9 @@ pub fn hash_string(input: &str, algorithm: &str) -> Result<Value, LangError> {
             Ok(Value::string(format!("{:x}", result)))
         },
         "md5" => {
-            let mut hasher = Md5::new();
-            hasher.update(input.as_bytes());
-            let result = hasher.finalize();
+            let mut hasher = md5::Context::new();
+            hasher.consume(input.as_bytes());
+            let result = hasher.compute();
             Ok(Value::string(format!("{:x}", result)))
         },
         _ => Err(LangError::runtime_error(&format!("Unsupported hash algorithm: {}", algorithm))),
@@ -36,7 +37,7 @@ pub fn hash_string(input: &str, algorithm: &str) -> Result<Value, LangError> {
 /// Usage: h("file", "sha1") → "..."
 pub fn hash_file(path: &str, algorithm: &str) -> Result<Value, LangError> {
     // Check if file system operations are allowed
-    check_fs_allowed()?;
+    check_path_allowed(path)?;
     
     // Open the file
     let mut file = match File::open(path) {
@@ -59,9 +60,9 @@ pub fn hash_file(path: &str, algorithm: &str) -> Result<Value, LangError> {
             Ok(Value::string(format!("{:x}", result)))
         },
         "md5" => {
-            let mut hasher = Md5::new();
-            hasher.update(&buffer);
-            let result = hasher.finalize();
+            let mut hasher = md5::Context::new();
+            hasher.consume(&buffer);
+            let result = hasher.compute();
             Ok(Value::string(format!("{:x}", result)))
         },
         _ => Err(LangError::runtime_error(&format!("Unsupported hash algorithm: {}", algorithm))),
