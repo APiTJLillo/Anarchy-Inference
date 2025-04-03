@@ -13,3 +13,4 @@ pub mod ui;
 pub mod semantic;
 pub mod lsp;
 pub mod std;
+pub mod std_lib;
