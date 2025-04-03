@@ -3,7 +3,7 @@
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 use crate::ast::ASTNode;
-use crate::core::value::{Value, GcValue};
+use crate::core::value::Value;
 use crate::interpreter::Environment;
 
 /// Concrete implementations of complex values managed by the garbage collector
@@ -19,6 +19,9 @@ pub enum GcValueImpl {
     },
     // Other complex types that need GC
 }
+
+// Re-export GcValue for public use
+pub use crate::core::value::GcValue;
 
 impl GcValue {
     /// Extract references from a value
@@ -52,7 +55,7 @@ impl GcValue {
                     }
                 }
             },
-            GcValueImpl::Function { closure, .. } => {
+            GcValueImpl::Function { .. } => {
                 // Extract references from the closure environment
                 // This would need a more complex implementation to traverse the environment
                 // and find all GcValue references
@@ -78,7 +81,7 @@ impl GcValue {
                 std::mem::size_of::<GcValueImpl>() + 
                 items.len() * std::mem::size_of::<Value>()
             },
-            GcValueImpl::Function { name, parameters, body, closure } => {
+            GcValueImpl::Function { name, parameters, body: _, closure: _ } => {
                 // Base size + size of name, parameters, and an estimate for body and closure
                 std::mem::size_of::<GcValueImpl>() + 
                 name.len() + 
@@ -123,7 +126,6 @@ impl GcValueImpl {
     pub fn might_form_cycle(&self) -> bool {
         match self {
             Self::Object(_) | Self::Array(_) | Self::Function { .. } => true,
-            // Add other complex types that might form cycles
         }
     }
     

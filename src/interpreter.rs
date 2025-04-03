@@ -2,10 +2,11 @@
 // This file contains the interpreter with garbage collection support
 
 use std::collections::HashMap;
+use std::fmt;
+use std::sync::Arc;
 use crate::ast::{ASTNode, NodeType};
 use crate::error::{LangError, StackFrame};
 use crate::value::Value;
-use crate::rc_value::{RcComplexValue, ComplexValue};
 
 /// Environment for variable storage
 pub struct Environment {
@@ -13,6 +14,20 @@ pub struct Environment {
     variables: HashMap<String, Value>,
     /// Parent environment (for closures)
     parent: Option<Box<Environment>>,
+}
+
+// Explicitly implement Send and Sync for Environment
+// This is safe because all fields (HashMap and Option<Box<Environment>>) are Send + Sync
+unsafe impl Send for Environment {}
+unsafe impl Sync for Environment {}
+
+impl fmt::Debug for Environment {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Environment")
+            .field("variables", &self.variables.keys().collect::<Vec<_>>())
+            .field("has_parent", &self.parent.is_some())
+            .finish()
+    }
 }
 
 impl Environment {

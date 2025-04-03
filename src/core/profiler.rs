@@ -4,6 +4,7 @@
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
+use std::cell::Cell;
 
 /// A performance profiler for tracking execution time and memory usage
 #[derive(Debug)]
@@ -12,8 +13,8 @@ pub struct Profiler {
     active_spans: Mutex<HashMap<String, SpanData>>,
     /// Completed span statistics
     completed_spans: Mutex<HashMap<String, Vec<SpanStats>>>,
-    /// Global start time
-    start_time: Instant,
+    /// Global start time - using Cell for interior mutability
+    start_time: Cell<Instant>,
     /// Whether profiling is enabled
     enabled: Mutex<bool>,
 }
@@ -50,7 +51,7 @@ impl Profiler {
         Self {
             active_spans: Mutex::new(HashMap::new()),
             completed_spans: Mutex::new(HashMap::new()),
-            start_time: Instant::now(),
+            start_time: Cell::new(Instant::now()),
             enabled: Mutex::new(true),
         }
     }
@@ -103,7 +104,7 @@ impl Profiler {
                 duration,
                 memory_delta,
                 parent: span_data.parent,
-                timestamp: span_data.start_time.duration_since(self.start_time),
+                timestamp: span_data.start_time.duration_since(self.start_time.get()),
             };
             
             // Add to the completed spans
@@ -133,9 +134,8 @@ impl Profiler {
         active_spans.clear();
         completed_spans.clear();
         
-        // Reset the start time
-        let start_time = unsafe { &mut *((&self.start_time) as *const Instant as *mut Instant) };
-        *start_time = Instant::now();
+        // Reset the start time using Cell's set method - safe interior mutability
+        self.start_time.set(Instant::now());
     }
     
     /// Get statistics for all completed spans
@@ -152,7 +152,7 @@ impl Profiler {
     
     /// Get the total elapsed time since the profiler was created
     pub fn total_elapsed(&self) -> Duration {
-        self.start_time.elapsed()
+        self.start_time.get().elapsed()
     }
     
     /// Generate a report of all profiling data
@@ -197,14 +197,12 @@ impl Profiler {
 impl Clone for Profiler {
     fn clone(&self) -> Self {
         // Create a new profiler with the same settings
-        let new_profiler = Profiler::new();
-        
-        // Copy enabled state
-        {
-            let enabled = self.enabled.lock().unwrap();
-            let mut new_enabled = new_profiler.enabled.lock().unwrap();
-            *new_enabled = *enabled;
-        }
+        let new_profiler = Profiler {
+            active_spans: Mutex::new(HashMap::new()),
+            completed_spans: Mutex::new(HashMap::new()),
+            start_time: Cell::new(self.start_time.get()),
+            enabled: Mutex::new(*self.enabled.lock().unwrap()),
+        };
         
         // Copy active spans
         {
@@ -219,20 +217,14 @@ impl Clone for Profiler {
             }
         }
         
-        // Copy completed spans - commented out for now to avoid type annotation issues
-        /*
+        // Copy completed spans
         {
             let completed_spans = self.completed_spans.lock().unwrap();
             let mut new_completed_spans = new_profiler.completed_spans.lock().unwrap();
             for (name, spans) in completed_spans.iter() {
-                let mut new_spans: Vec<SpanStats> = Vec::new();
-                for span in spans {
-                    new_spans.push(span.clone());
-                }
-                new_completed_spans.insert(name.clone(), new_spans);
+                new_completed_spans.insert(name.clone(), spans.clone());
             }
         }
-        */
         
         new_profiler
     }

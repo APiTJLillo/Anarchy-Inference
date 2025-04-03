@@ -42,37 +42,6 @@ pub struct GcValue {
     pub gc: Arc<dyn GarbageCollector>,
 }
 
-impl GcValue {
-    /// Extract references from a GC value
-    pub fn extract_references(value: &GcValueImpl) -> HashSet<usize> {
-        let mut references = HashSet::new();
-        
-        match value {
-            GcValueImpl::Object(map) => {
-                // Extract references from object properties
-                for (_, prop_value) in map {
-                    if let Value::GcManaged(gc_value) = prop_value {
-                        references.insert(gc_value.id);
-                    }
-                }
-            },
-            GcValueImpl::Array(items) => {
-                // Extract references from array elements
-                for item in items {
-                    if let Value::GcManaged(gc_value) = item {
-                        references.insert(gc_value.id);
-                    }
-                }
-            },
-            GcValueImpl::Function { .. } => {
-                // Functions don't have references to other GC values in this implementation
-            },
-        }
-        
-        references
-    }
-}
-
 impl Value {
     /// Create a null value
     pub fn null() -> Self {
@@ -147,7 +116,7 @@ impl Value {
                     if let GcValueImpl::Object(ref mut map) = obj_value {
                         map.insert(name, value);
                         // Update references in the GC
-                        let references = GcValue::extract_references(&obj_value);
+                        let references = crate::garbage_collection::managed::GcValue::extract_references(&obj_value);
                         gc_value.gc.update_references(gc_value.id, references);
                         Ok(())
                     } else {
@@ -192,7 +161,7 @@ impl Value {
                         if index < items.len() {
                             items[index] = value;
                             // Update references in the GC
-                            let references = GcValue::extract_references(&arr_value);
+                            let references = crate::garbage_collection::managed::GcValue::extract_references(&arr_value);
                             gc_value.gc.update_references(gc_value.id, references);
                             Ok(())
                         } else {
