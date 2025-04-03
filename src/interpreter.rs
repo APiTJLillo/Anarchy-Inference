@@ -152,6 +152,7 @@ impl Interpreter {
     /// Interpret an AST node
     pub fn interpret(&mut self, node: &ASTNode) -> Result<Value, LangError> {
         match &node.node_type {
+            NodeType::Null => Ok(Value::null()),
             NodeType::Number(n) => Ok(Value::number(*n as f64)),
             NodeType::String(s) => Ok(Value::string(s.clone())),
             NodeType::Boolean(b) => Ok(Value::boolean(*b)),
@@ -161,6 +162,78 @@ impl Interpreter {
                 } else {
                     Err(LangError::runtime_error(&format!("Undefined variable '{}'", name)))
                 }
+            },
+            NodeType::Library { name, functions } => {
+                // Create a new environment for the library
+                let mut library_env = Environment::new();
+                
+                // Process all functions in the library
+                for func in functions {
+                    if let NodeType::FunctionDeclaration { name: func_name, parameters, body } = &func.node_type {
+                        let function_value = self.create_function(func_name.clone(), parameters.clone(), body.clone());
+                        library_env.define(func_name.clone(), function_value);
+                    }
+                }
+                
+                // Store the library in the global environment
+                self.globals.define(name.clone(), Value::object(library_env.variables));
+                
+                Ok(Value::null())
+            },
+            NodeType::FunctionDeclaration { name, parameters, body } => {
+                let function_value = self.create_function(name.clone(), parameters.clone(), body.clone());
+                self.environment.define(name.clone(), function_value);
+                Ok(Value::null())
+            },
+            NodeType::FunctionCall { callee, arguments } => {
+                // Evaluate the callee
+                let callee_value = self.interpret(callee)?;
+                
+                // Evaluate the arguments
+                let mut arg_values = Vec::new();
+                for arg in arguments {
+                    arg_values.push(self.interpret(arg)?);
+                }
+                
+                // For now, just return null as a placeholder
+                Ok(Value::null())
+            },
+            NodeType::PropertyAccess { object, property } => {
+                // Evaluate the object
+                let object_value = self.interpret(object)?;
+                
+                // Try to get the property from the object
+                if let Ok(prop_value) = object_value.get_property(property) {
+                    Ok(prop_value)
+                } else {
+                    // If property doesn't exist, return null
+                    Ok(Value::null())
+                }
+            },
+            NodeType::MethodCall { object, method, arguments } => {
+                // Evaluate the object
+                let _object_value = self.interpret(object)?;
+                
+                // Evaluate the arguments
+                let mut _arg_values = Vec::new();
+                for arg in arguments {
+                    _arg_values.push(self.interpret(arg)?);
+                }
+                
+                // For now, just return null as a placeholder
+                Ok(Value::null())
+            },
+            NodeType::Block(statements) => {
+                let mut result = Value::null();
+                for stmt in statements {
+                    result = self.interpret(stmt)?;
+                }
+                Ok(result)
+            },
+            NodeType::Print(expr) => {
+                let value = self.interpret(expr)?;
+                println!("{}", value);
+                Ok(value)
             },
             // Add other node types as needed
             _ => Err(LangError::runtime_error("Unsupported node type")),
