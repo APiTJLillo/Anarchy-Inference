@@ -2,7 +2,6 @@ use crate::error::LangError;
 use crate::lexer::Lexer;
 use crate::parser::Parser;
 use crate::interpreter::Interpreter;
-use crate::ui::App;
 use std::fs;
 use log::debug;
 
@@ -43,8 +42,12 @@ async fn main() -> Result<(), LangError> {
         interpreter.execute(node)?;
     }
 
-    // Initialize Yew app
-    yew::Renderer::<App>::new().render();
+    // Only initialize Yew app when targeting wasm32
+    #[cfg(target_arch = "wasm32")]
+    {
+        use crate::ui::App;
+        yew::Renderer::<App>::new().render();
+    }
     
     Ok(())
 }
