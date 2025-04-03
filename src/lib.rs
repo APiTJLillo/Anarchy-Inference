@@ -12,3 +12,4 @@ pub mod garbage_collection;
 pub mod ui;
 pub mod semantic;
 pub mod lsp;
+pub mod std;
