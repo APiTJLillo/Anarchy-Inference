@@ -6,9 +6,7 @@ use std::collections::HashMap;
 use std::sync::Arc;
 use crate::lexer::Lexer;
 use crate::parser::Parser;
-use crate::interpreter::Interpreter;
-use crate::error::LangError;
-use log::{debug, info};
+use log::info;
 
 pub struct LspState {
     client: Client,

@@ -2,7 +2,7 @@
 // Core types for the garbage collection system
 
 use std::collections::HashSet;
-use crate::gc::managed::GcValueImpl;
+use crate::garbage_collection::managed::GcValueImpl;
 
 /// Statistics for garbage collection
 #[derive(Debug, Default, Clone)]

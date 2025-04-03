@@ -174,7 +174,7 @@ impl fmt::Display for Value {
             Self::Complex(complex) => {
                 let borrowed = complex.borrow();
                 match borrowed.value_type {
-                    crate::rc_value::ComplexValueType::Object => {
+                    ComplexValueType::Object => {
                         if let Some(obj) = &borrowed.object_data {
                             write!(f, "{{ ")?;
                             let mut first = true;

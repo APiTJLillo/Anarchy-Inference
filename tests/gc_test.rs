@@ -2,10 +2,10 @@
 mod gc_tests {
     use std::collections::HashMap;
     use std::sync::Arc;
-    use crate::gc::collector::GarbageCollector;
-    use crate::gc::managed::GcValueImpl;
-    use crate::core::gc_types::GarbageCollector as GcTrait;
-    use crate::core::value::{Value, GcValue};
+    use anarchy_inference::gc::collector::GarbageCollector;
+    use anarchy_inference::gc::managed::GcValueImpl;
+    use anarchy_inference::core::gc_types::GarbageCollector as GcTrait;
+    use anarchy_inference::core::value::{Value, GcValue};
 
     #[test]
     fn test_gc_allocation() {

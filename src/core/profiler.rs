@@ -76,7 +76,7 @@ impl Profiler {
         
         // Return a guard that will end the span when dropped
         Some(SpanGuard {
-            profiler: Arc::new(self),
+            profiler: Arc::new(self.clone()),
             name: name.to_string(),
         })
     }
@@ -134,7 +134,7 @@ impl Profiler {
         completed_spans.clear();
         
         // Reset the start time
-        let mut start_time = unsafe { &mut *((&self.start_time) as *const Instant as *mut Instant) };
+        let start_time = unsafe { &mut *((&self.start_time) as *const Instant as *mut Instant) };
         *start_time = Instant::now();
     }
     
@@ -190,6 +190,51 @@ impl Profiler {
         }
         
         report
+    }
+}
+
+// Implement Clone for Profiler
+impl Clone for Profiler {
+    fn clone(&self) -> Self {
+        // Create a new profiler with the same settings
+        let new_profiler = Profiler::new();
+        
+        // Copy enabled state
+        {
+            let enabled = self.enabled.lock().unwrap();
+            let mut new_enabled = new_profiler.enabled.lock().unwrap();
+            *new_enabled = *enabled;
+        }
+        
+        // Copy active spans
+        {
+            let active_spans = self.active_spans.lock().unwrap();
+            let mut new_active_spans = new_profiler.active_spans.lock().unwrap();
+            for (name, span_data) in active_spans.iter() {
+                new_active_spans.insert(name.clone(), SpanData {
+                    start_time: span_data.start_time,
+                    parent: span_data.parent.clone(),
+                    start_memory: span_data.start_memory,
+                });
+            }
+        }
+        
+        // Copy completed spans - commented out for now to avoid type annotation issues
+        /*
+        {
+            let completed_spans = self.completed_spans.lock().unwrap();
+            let mut new_completed_spans = new_profiler.completed_spans.lock().unwrap();
+            for (name, spans) in completed_spans.iter() {
+                let mut new_spans: Vec<SpanStats> = Vec::new();
+                for span in spans {
+                    new_spans.push(span.clone());
+                }
+                new_completed_spans.insert(name.clone(), new_spans);
+            }
+        }
+        */
+        
+        new_profiler
     }
 }
 

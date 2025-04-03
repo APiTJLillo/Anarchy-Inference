@@ -3,10 +3,10 @@
 
 use std::fmt;
 use std::sync::Arc;
-use std::collections::HashMap;
+use std::collections::HashSet;
 use crate::ast::ASTNode;
 use crate::error::LangError;
-use crate::gc::managed::GcValueImpl;
+use crate::garbage_collection::managed::GcValueImpl;
 use crate::core::gc_types::GarbageCollector;
 
 /// Types of values in the language
@@ -40,6 +40,37 @@ pub struct GcValue {
     pub id: usize,
     // Back-reference to the garbage collector
     pub gc: Arc<dyn GarbageCollector>,
+}
+
+impl GcValue {
+    /// Extract references from a GC value
+    pub fn extract_references(value: &GcValueImpl) -> HashSet<usize> {
+        let mut references = HashSet::new();
+        
+        match value {
+            GcValueImpl::Object(map) => {
+                // Extract references from object properties
+                for (_, prop_value) in map {
+                    if let Value::GcManaged(gc_value) = prop_value {
+                        references.insert(gc_value.id);
+                    }
+                }
+            },
+            GcValueImpl::Array(items) => {
+                // Extract references from array elements
+                for item in items {
+                    if let Value::GcManaged(gc_value) = item {
+                        references.insert(gc_value.id);
+                    }
+                }
+            },
+            GcValueImpl::Function { .. } => {
+                // Functions don't have references to other GC values in this implementation
+            },
+        }
+        
+        references
+    }
 }
 
 impl Value {

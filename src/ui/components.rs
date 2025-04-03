@@ -92,14 +92,19 @@ pub fn editor() -> Html {
             let mut interpreter = Interpreter::new();
             
             match parser.parse() {
-                Ok(ast) => {
-                    match interpreter.execute(&[ast]) {
-                        Ok(result) => {
-                            output_value.set(format!("Result: {:?}", result));
+                Ok(ast_nodes) => {
+                    // Use the first node from the returned Vec<ASTNode>
+                    if let Some(ast) = ast_nodes.first() {
+                        match interpreter.execute(ast) {
+                            Ok(result) => {
+                                output_value.set(format!("Result: {:?}", result));
+                            }
+                            Err(e) => {
+                                output_value.set(format!("Runtime error: {:?}", e));
+                            }
                         }
-                        Err(e) => {
-                            output_value.set(format!("Runtime error: {:?}", e));
-                        }
+                    } else {
+                        output_value.set("No AST nodes generated".to_string());
                     }
                 }
                 Err(e) => {

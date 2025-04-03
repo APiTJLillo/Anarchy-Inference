@@ -3,7 +3,6 @@
 use std::collections::HashMap;
 use crate::ast::{ASTNode, NodeType};
 use crate::error::LangError;
-use crate::lexer::Token;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Type {
@@ -87,6 +86,7 @@ impl SemanticAnalyzer {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::lexer::Token;
 
     #[test]
     fn test_basic_types() {

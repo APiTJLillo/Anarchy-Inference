@@ -2,7 +2,16 @@
 mod profiler_tests {
     use std::time::Duration;
     use std::thread;
-    use crate::core::profiler::Profiler;
+    use anarchy_inference::core::profiler::Profiler;
+
+    // Define the macro locally for testing
+    macro_rules! profile_span {
+        ($profiler:expr, $name:expr, $memory_provider:expr, $body:block) => {{
+            let _guard = $profiler.start_span($name, $memory_provider.current_memory());
+            let result = $body;
+            result
+        }};
+    }
 
     #[test]
     fn test_profiler_basic() {

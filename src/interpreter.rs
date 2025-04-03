@@ -3,8 +3,8 @@
 
 use std::collections::HashMap;
 use crate::ast::{ASTNode, NodeType};
-use crate::error::{LangError, SourceLocation, StackFrame};
-use crate::value::{Value, ValueType};
+use crate::error::{LangError, StackFrame};
+use crate::value::Value;
 use crate::rc_value::{RcComplexValue, ComplexValue};
 
 /// Environment for variable storage
@@ -123,7 +123,7 @@ impl Interpreter {
     }
     
     /// Create a new function
-    pub fn create_function(&mut self, name: String, params: Vec<String>, body: Box<ASTNode>) -> Value {
+    pub fn create_function(&mut self, _name: String, params: Vec<String>, body: Box<ASTNode>) -> Value {
         self.memory_stats.functions_allocated += 1;
         self.memory_stats.total_complex_values += 1;
         Value::function(params, body)
@@ -152,8 +152,13 @@ impl Interpreter {
         }
     }
     
-    /// Execute a program
-    pub fn execute(&mut self, nodes: &[ASTNode]) -> Result<Value, LangError> {
+    /// Execute a program with a single AST node
+    pub fn execute(&mut self, node: &ASTNode) -> Result<Value, LangError> {
+        self.interpret(node)
+    }
+    
+    /// Execute a program with multiple AST nodes
+    pub fn execute_nodes(&mut self, nodes: &[ASTNode]) -> Result<Value, LangError> {
         let mut result = Value::null();
         for node in nodes {
             result = self.interpret(node)?;

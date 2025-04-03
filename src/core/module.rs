@@ -76,6 +76,18 @@ impl ModuleCache {
 }
 
 impl Module {
+    /// Create a new module with name and empty exports
+    pub fn new(name: &str, path: PathBuf) -> Self {
+        Self {
+            name: name.to_string(),
+            path,
+            exports: Mutex::new(HashMap::new()),
+            ast: Vec::new(),
+            dependencies: Vec::new(),
+            initialized: Mutex::new(false),
+        }
+    }
+
     /// Load a module from a file
     pub fn load(path: &str) -> Result<Self, LangError> {
         // Read the file
@@ -83,8 +95,9 @@ impl Module {
             .map_err(|e| LangError::io_error(&format!("Failed to read module file: {}", e)))?;
         
         // Parse the file
-        let lexer = Lexer::new(&source);
-        let mut parser = Parser::new(lexer);
+        let mut lexer = Lexer::new(source);
+        let tokens = lexer.tokenize()?;
+        let mut parser = Parser::new(tokens);
         let ast = parser.parse()?;
         
         // Extract module name from path
@@ -122,7 +135,7 @@ impl Module {
     }
     
     /// Extract a dependency from a single AST node
-    fn extract_dependency_from_node(node: &ASTNode) -> Option<String> {
+    fn extract_dependency_from_node(_node: &ASTNode) -> Option<String> {
         // This would need to be implemented based on the actual AST structure
         // For now, we'll return None as a placeholder
         None

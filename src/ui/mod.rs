@@ -1,6 +1,5 @@
 use std::sync::Mutex;
 use std::error::Error;
-use yew::prelude::*;
 use crate::error::LangError;
 
 pub mod components;

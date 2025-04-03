@@ -1,10 +1,8 @@
 // Lexer for the minimal LLM-friendly language
 
-use regex::Regex;
 use crate::error::LangError;
 use std::fmt;
 use std::fmt::Display;
-use std::collections::HashMap;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Token {

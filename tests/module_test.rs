@@ -1,8 +1,9 @@
 #[cfg(test)]
 mod module_tests {
     use std::path::PathBuf;
-    use crate::core::module::{ModuleResolver, Module};
-    use crate::error::LangError;
+    use anarchy_inference::error::LangError;
+    use anarchy_inference::core::module::{ModuleResolver, Module};
+    use anarchy_inference::core::value::Value;
 
     #[test]
     fn test_module_resolver() {
@@ -57,7 +58,7 @@ mod module_tests {
         assert!(module.is_initialized());
         
         // Test exports
-        module.export("test_value", crate::core::value::Value::Null);
+        module.export("test_value", Value::Null);
         let export = module.get_export("test_value");
         assert!(export.is_some());
         
@@ -69,7 +70,7 @@ mod module_tests {
     #[test]
     fn test_module_cache() {
         // Create a module cache
-        let cache = crate::core::module::ModuleCache::new();
+        let cache = anarchy_inference::core::module::ModuleCache::new();
         
         // We can't test actual module loading without creating files,
         // so we'll just test the cache functionality

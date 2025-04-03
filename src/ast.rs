@@ -1,3 +1,4 @@
+// src/ast.rs - Modified to add Null variant
 use crate::error::SourceLocation;
 use crate::lexer::Token;
 
@@ -10,6 +11,7 @@ pub struct ASTNode {
 
 #[derive(Debug, Clone)]
 pub enum NodeType {
+    Null,  // Added Null variant for empty/null values
     Number(i64),
     String(String),
     Boolean(bool),
@@ -177,7 +179,7 @@ mod tests {
         };
         assert!(matches!(node.node_type, NodeType::Channel(_)));
 
-        let state = Box::new(ASTNode {
+        let _state = Box::new(ASTNode {
             node_type: NodeType::Variable("state".to_string()),
             line: 1,
             column: 1,
@@ -197,4 +199,4 @@ mod tests {
         };
         assert!(matches!(node.node_type, NodeType::SetSharedState { .. }));
     }
-} 
+}
