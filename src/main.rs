@@ -37,7 +37,11 @@ async fn main() -> Result<(), LangError> {
     let mut parser = Parser::new(tokens);
     let ast = parser.parse_program()?;
     let mut interpreter = Interpreter::new();
-    interpreter.execute(&ast)?;
+    
+    // Execute each node in the AST
+    for node in &ast {
+        interpreter.execute(node)?;
+    }
 
     // Initialize Yew app
     yew::Renderer::<App>::new().render();

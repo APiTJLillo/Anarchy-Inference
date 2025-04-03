@@ -2,8 +2,8 @@
 mod gc_tests {
     use std::collections::HashMap;
     use std::sync::Arc;
-    use anarchy_inference::gc::collector::GarbageCollector;
-    use anarchy_inference::gc::managed::GcValueImpl;
+    use anarchy_inference::garbage_collection::collector::GarbageCollector;
+    use anarchy_inference::garbage_collection::managed::GcValueImpl;
     use anarchy_inference::core::gc_types::GarbageCollector as GcTrait;
     use anarchy_inference::core::value::{Value, GcValue};
 

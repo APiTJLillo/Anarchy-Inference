@@ -37,20 +37,13 @@ mod module_tests {
         // We can't test actual file loading without creating files,
         // so we'll test the Module struct functionality
         
-        // Create a module manually
-        let module = Module {
-            name: "test_module".to_string(),
-            path: PathBuf::from("/test/module.a.i"),
-            exports: std::sync::Mutex::new(std::collections::HashMap::new()),
-            ast: Vec::new(),
-            dependencies: vec!["dep1".to_string(), "dep2".to_string()],
-            initialized: std::sync::Mutex::new(false),
-        };
+        // Create a module using the public constructor
+        let module = Module::new("test_module", PathBuf::from("/test/module.a.i"));
         
         // Test basic properties
         assert_eq!(module.name(), "test_module");
         assert_eq!(module.path(), &PathBuf::from("/test/module.a.i"));
-        assert_eq!(module.dependencies(), &["dep1".to_string(), "dep2".to_string()]);
+        assert_eq!(module.dependencies().len(), 0); // No dependencies initially
         assert!(!module.is_initialized());
         
         // Test initialization
@@ -58,7 +51,7 @@ mod module_tests {
         assert!(module.is_initialized());
         
         // Test exports
-        module.export("test_value", Value::Null);
+        module.export("test_value", Value::null());
         let export = module.get_export("test_value");
         assert!(export.is_some());
         

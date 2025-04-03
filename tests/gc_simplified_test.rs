@@ -1,11 +1,11 @@
 #[cfg(test)]
 mod tests {
-    use crate::value::{Value, ValueType};
-    use crate::rc_value::{RcComplexValue, ComplexValue};
-    use crate::interpreter::Interpreter;
-    use crate::ast::{ASTNode, NodeType};
+    use anarchy_inference::value::{Value, ValueType};
+    use anarchy_inference::rc_value::{RcComplexValue, ComplexValue};
+    use anarchy_inference::interpreter::Interpreter;
+    use anarchy_inference::ast::{ASTNode, NodeType};
     use std::collections::HashMap;
-    use crate::error::SourceLocation;
+    use anarchy_inference::error::SourceLocation;
 
     #[test]
     fn test_rc_value_creation() {
@@ -156,7 +156,8 @@ mod tests {
             vec!["x".to_string(), "y".to_string()],
             Box::new(ASTNode {
                 node_type: NodeType::Number(42),
-                location: SourceLocation::default(),
+                line: 1,
+                column: 1,
             })
         );
         
