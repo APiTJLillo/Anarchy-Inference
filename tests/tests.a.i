@@ -1,1 +1,240 @@
-λc{ƒ⌽(σ,m){⌽(m)}ƒt1(){ιx=10;ιy=2;⌽("t1");⟼(x+y)}ƒt2(){ιx=10;ιy=2;⌽("t2");⟼(x-y)}ƒt3(){ιx=10;ιy=2;⌽("t3");⟼(x*y)}ƒt4(){ιx=10;ιy=2;⌽("t4");⟼(x/y)}ƒt5(){ιs1="Hello, ";ιs2="World!";⌽("t5");⟼(s1+s2)}ƒt6(){ιs1="Hello";ιs2="Hello";⌽("t6");⟼(s1=s2)}ƒt7(){ιcoll=∅;＋(coll,1);＋(coll,2);＋(coll,3);＋(coll,4);⌽("t7");⟼(∑(coll))}ƒt8(){÷{⌽("t8");⟼(1/0)}{⟼("Error caught!")}}ƒt9(){÷{ιx=42;⌽("t9");⟼(x)}{⟼("Shouldn't reach here")}}ƒt10(){ιx=5;ιy=3;ιz=2;ιw=y*z;⌽("t10");⟼(x+w)}ƒt11(){ιx=10;ιy=10;ιz=5;⌽("t11");⟼(x=y)}ƒt12(){ιx=10;ιy=5;⌽("t12");⟼(x=y)}}ƒm(){c.⌽("Running comprehensive tests:");c.⌽("Test 1 (addition):");c.⌽(c.t1());c.⌽("Test 2 (subtraction):");c.⌽(c.t2());c.⌽("Test 3 (multiplication):");c.⌽(c.t3());c.⌽("Test 4 (division):");c.⌽(c.t4());c.⌽("Test 5 (string concat):");c.⌽(c.t5());c.⌽("Test 6 (string equality):");c.⌽(c.t6());c.⌽("Test 7 (collection):");c.⌽(c.t7());c.⌽("Test 8 (error handling):");c.⌽(c.t8());c.⌽("Test 9 (try-catch no error):");c.⌽(c.t9());c.⌽("Test 10 (nested expr):");c.⌽(c.t10());c.⌽("Test 11 (equality true):");c.⌽(c.t11());c.⌽("Test 12 (equality false):");c.⌽(c.t12())}m();λtest{ƒtest_syntax_error(){÷{ιx=;⟼(⊥)}{⟼(⊤)}}ƒtest_type_error(){÷{ιx=42;ιy="hello";⟼(x+y);⟼(⊥)}{⟼(⊤)}}ƒtest_runtime_error(){÷{ιx=42;ιy=0;⟼(x/y);⟼(⊥)}{⟼(⊤)}}ƒtest_channel(){ιchan=⟿(5);⇢(chan,42);ιval=⇠(chan);⟼(val=42)}ƒtest_channel_buffer(){ιchan=⟿(2);⇢(chan,1);⇢(chan,2);÷{⇢(chan,3);⟼(⊥)}{⟼(⊤)}}ƒtest_shared_state(){ιstate=⟰("test_state");⇡(state,"key",42);ιval=⇣(state,"key");⟼(val=42)}ƒtest_shared_state_concurrent(){ιstate=⟰("concurrent_state");⇡(state,"counter",0);∀(∅,λ_{ιcurrent=⇣(state,"counter");⇡(state,"counter",current+1)});ιfinal=⇣(state,"counter");⟼(final>0)}ƒrun(){⌽("Running error handling and concurrency tests...");⌽("Testing error handling...");test_syntax_error();test_type_error();test_runtime_error();⌽("Testing concurrency features...");test_channel();test_channel_buffer();test_shared_state();test_shared_state_concurrent();⌽("All tests completed.")}}test.run();λ⬢{ƒ□(σ,t,w,h){⬢.□(t,w,h)}ƒ⬚(σ,t,c){⬢.⬚(t,c)}ƒ✎(σ,c){⬢.✎(c)}ƒ⌨(σ,p,e){⬢.⌨(p,e)}}λapp{ƒstart(){⬢.□("Test App",300,200);⬢.✎("Hello World");}}app.start(); 
+λ test {
+    ƒ ⌽(σ,m) {
+        ⌽(m);
+    };
+    
+    ƒ t1() {
+        ι=10;
+        ιy=;
+        ⌽("t1");
+        ⟼(+y);
+    };
+    
+    ƒ t() {
+        ι=10;
+        ιy=;
+        ⌽("t");
+        ⟼(-y);
+    };
+    
+    ƒ t3() {
+        ι=10;
+        ιy=;
+        ⌽("t3");
+        ⟼(*y);
+    };
+    
+    ƒ t4() {
+        ι=10;
+        ιy=;
+        ⌽("t4");
+        ⟼(/y);
+    };
+    
+    ƒ t5() {
+        ιs1="Hllo, ";
+        ιs="World!";
+        ⌽("t5");
+        ⟼(s1+s);
+    };
+    
+    ƒ t6() {
+        ιs1="Hllo";
+        ιs="Hllo";
+        ⌽("t6");
+        ⟼(s1=s);
+    };
+    
+    ƒ t7() {
+        ιoll=∅;
+        ＋(oll,1);
+        ＋(oll,);
+        ＋(oll,3);
+        ＋(oll,4);
+        ⌽("t7");
+        ⟼(∑(oll));
+    };
+    
+    ƒ t() {
+        ÷{
+            ⌽("t");
+            ⟼(1/0);
+        }{
+            ⟼("Error aught!");
+        };
+    };
+    
+    ƒ t() {
+        ÷{
+            ι=4;
+            ⌽("t");
+            ⟼();
+        }{
+            ⟼("Shouldn't rah hr");
+        };
+    };
+    
+    ƒ t10() {
+        ι=5;
+        ιy=3;
+        ιz=;
+        ιw=y*z;
+        ⌽("t10");
+        ⟼(+w);
+    };
+    
+    ƒ t11() {
+        ι=10;
+        ιy=10;
+        ιz=5;
+        ⌽("t11");
+        ⟼(=y);
+    };
+    
+    ƒ t1() {
+        ι=10;
+        ιy=5;
+        ⌽("t1");
+        ⟼(=y);
+    };
+    
+    ƒ m() {
+        .⌽("Running omprhnsiv tsts:");
+        .⌽("Tst 1 (addition):");
+        .⌽(.t1());
+        .⌽("Tst  (subtration):");
+        .⌽(.t());
+        .⌽("Tst 3 (multipliation):");
+        .⌽(.t3());
+        .⌽("Tst 4 (division):");
+        .⌽(.t4());
+        .⌽("Tst 5 (string onat):");
+        .⌽(.t5());
+        .⌽("Tst 6 (string quality):");
+        .⌽(.t6());
+        .⌽("Tst 7 (olltion):");
+        .⌽(.t7());
+        .⌽("Tst  (rror handling):");
+        .⌽(.t());
+        .⌽("Tst  (try-ath no rror):");
+        .⌽(.t());
+        .⌽("Tst 10 (nstd pr):");
+        .⌽(.t10());
+        .⌽("Tst 11 (quality tru):");
+        .⌽(.t11());
+        .⌽("Tst 1 (quality fals):");
+        .⌽(.t1());
+    };
+};
+m();
+
+λ tst {
+    ƒ tst_synta_rror() {
+        ÷{
+            ι=;
+            ⟼(⊥);
+        }{
+            ⟼(⊤);
+        };
+    };
+    
+    ƒ tst_typ_rror() {
+        ÷{
+            ι=4;
+            ιy="hllo";
+            ⟼(+y);
+            ⟼(⊥);
+        }{
+            ⟼(⊤);
+        };
+    };
+    
+    ƒ tst_runtim_rror() {
+        ÷{
+            ι=4;
+            ιy=0;
+            ⟼(/y);
+            ⟼(⊥);
+        }{
+            ⟼(⊤);
+        };
+    };
+    
+    ƒ tst_hannl() {
+        ιhan=⟿(5);
+        ⇢(han,4);
+        ιval=⇠(han);
+        ⟼(val=4);
+    };
+    
+    ƒ tst_hannl_buffr() {
+        ιhan=⟿();
+        ⇢(han,1);
+        ⇢(han,);
+        ÷{
+            ⇢(han,3);
+            ⟼(⊥);
+        }{
+            ⟼(⊤);
+        };
+    };
+    
+    ƒ tst_shard_stat() {
+        ιstat=⟰("tst_stat");
+        ⇡(stat,"ky",4);
+        ιval=⇣(stat,"ky");
+        ⟼(val=4);
+    };
+    
+    ƒ tst_shard_stat_onurrnt() {
+        ιstat=⟰("onurrnt_stat");
+        ⇡(stat,"ountr",0);
+        ∀(∅,λ_ {
+            ιurrnt=⇣(stat,"ountr");
+            ⇡(stat,"ountr",urrnt+1);
+        });
+        ιfinal=⇣(stat,"ountr");
+        ⟼(final>0);
+    };
+    
+    ƒ run() {
+        ⌽("Running rror handling and onurrny tsts...");
+        ⌽("Tsting rror handling...");
+        tst_synta_rror();
+        tst_typ_rror();
+        tst_runtim_rror();
+        ⌽("Tsting onurrny faturs...");
+        tst_hannl();
+        tst_hannl_buffr();
+        tst_shard_stat();
+        tst_shard_stat_onurrnt();
+        ⌽("All tsts ompltd.");
+    };
+};
+tst.run();
+
+λ ui {
+    ƒ ⬢(σ,t,w,h) {
+        ⬢.□(t,w,h);
+    };
+    
+    ƒ ⬚(σ,t,) {
+        ⬢.⬚(t,);
+    };
+    
+    ƒ ✎(σ,) {
+        ⬢.✎();
+    };
+    
+    ƒ ⌨(σ,p,) {
+        ⬢.⌨(p,);
+    };
+};
+
+λ app {
+    ƒ start() {
+        ⬢.□("Tst App",300,00);
+        ⬢.✎("Hllo World");
+    };
+};
+app.start(); 

@@ -118,17 +118,10 @@ impl Parser {
                                 let func = self.parse_function_declaration()?;
                                 functions.push(func);
 
-                                // Expect semicolon after function declaration
-                                match self.current_token()? {
-                                    TokenInfo { token: Token::Semicolon, .. } => {
+                                // Make semicolons after function declarations optional
+                                if let Ok(token_info) = self.current_token() {
+                                    if let Token::Semicolon = token_info.token {
                                         self.advance();
-                                    },
-                                    token_info => {
-                                        return Err(LangError::syntax_error_with_location(
-                                            "Expected semicolon after function declaration",
-                                            token_info.line,
-                                            token_info.column,
-                                        ));
                                     }
                                 }
                             },
