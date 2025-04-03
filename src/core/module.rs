@@ -221,7 +221,12 @@ impl ModuleResolver {
         // Check if the path is absolute
         let path = PathBuf::from(module_path);
         if path.is_absolute() {
-            return Ok(path.to_string_lossy().to_string());
+            // Check if the file exists before returning success
+            if path.exists() {
+                return Ok(path.to_string_lossy().to_string());
+            } else {
+                return Err(LangError::io_error(&format!("Module not found: {}", module_path)));
+            }
         }
         
         // Try to resolve relative to the base directory
