@@ -187,6 +187,7 @@ impl Lexer {
             | '⇪'
             | '⚡' | '⊲' | '⇉' | '⇓' | '⇑' | '⥮'
             | '⟿' | '⇢' | '⇠' | '⟰' | '⇡' | '⇣'
+            | '✎' | '⌨'
             => {
                 self.advance();
                 Token::SymbolicKeyword(c)
