@@ -7,6 +7,7 @@ A token-minimal, interpreted programming language optimized exclusively for LLM-
 - **Single-byte or minimal-byte encoding** for key constructs
 - **Mathematical or symbolic representations** for logic and structure
 - **Built-in compression mechanisms** for common code patterns
+- **String dictionary system** for reusing text across projects
 - **Native async support** for efficient concurrency and I/O operations
 - **Comprehensive networking library** for TCP/IP, HTTP, and WebSocket communication
 - **UI library** for creating simple user interfaces
@@ -33,6 +34,7 @@ A token-minimal, interpreted programming language optimized exclusively for LLM-
 - `∇` - Core library
 - `⚠` - Error library
 - `⟑` - Type library
+- `:` - String dictionary reference prefix (e.g., `:key`)
 
 ### Greek Letters (Variable Prefixes)
 - `α`, `β`, `γ` - Generic variables
@@ -84,6 +86,13 @@ A token-minimal, interpreted programming language optimized exclusively for LLM-
 - `📁_allow` - Limit I/O to specific directories
 - `🔓_sh` - Enable/disable shell commands
 - `🔓_net` - Enable/disable network operations
+
+### String Dictionary Operations
+- `📝` - Set string in dictionary (`📝("key", "value")`)
+- `📖` - Get string from dictionary (`📖("key")` → `"value"`)
+- `🔠` - Load string dictionary from file (`🔠("path")`)
+- `💾` - Save string dictionary to file (`💾("dict_name", "path")`)
+- `🔄` - Switch active dictionary (`🔄("dict_name")`)
 
 ### Timers and Environment
 - `⏰` - Set timeout
@@ -222,12 +231,35 @@ A token-minimal, interpreted programming language optimized exclusively for LLM-
 }
 ```
 
+### String Dictionary Usage
+```
+// Define strings in dictionary
+📝("greeting", "Hello, {}!");
+📝("farewell", "Goodbye, {}!");
+
+// Use string references with formatting
+ƒgreet(σname){
+    // Use :key syntax to reference strings from dictionary
+    ⌽(:greeting, name);
+}
+
+ƒsayGoodbye(σname){
+    ⌽(:farewell, name);
+}
+
+ƒmain(){
+    greet("World");
+    sayGoodbye("World");
+}
+```
+
 ## Implementation Status
 
 ### Core Features ✅
 - Single-byte token encoding
 - Mathematical and symbolic representations
 - Built-in compression mechanisms
+- String dictionary system for text reuse
 - Native async support
 - Comprehensive error handling with stack traces
 - Type system with inference
@@ -312,6 +344,15 @@ A token-minimal, interpreted programming language optimized exclusively for LLM-
 - Efficient symbol encoding
 - Minimal token usage
 - Optimized AST representation
+- String dictionary for text reuse
+
+### String Dictionary System
+- Centralized string storage to minimize token usage
+- String references using `:key` syntax
+- String formatting with placeholder support
+- Multiple dictionaries with switching capability
+- File-based dictionary loading and saving
+- Significant token reduction for text-heavy applications
 
 ## Running the Language
 

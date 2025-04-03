@@ -1,5 +1,5 @@
-// src/interpreter.rs - Modified to integrate with reference counting
-// This file contains the interpreter with garbage collection support
+// src/interpreter.rs - Modified to integrate with reference counting and string dictionary
+// This file contains the interpreter with garbage collection support and string dictionary
 
 use std::collections::HashMap;
 use std::fmt;
@@ -7,6 +7,7 @@ use std::sync::Arc;
 use crate::ast::{ASTNode, NodeType};
 use crate::error::{LangError, StackFrame};
 use crate::value::Value;
+use crate::core::string_dict::{StringDictionary, StringDictionaryManager};
 
 /// Environment for variable storage
 pub struct Environment {
@@ -90,6 +91,8 @@ pub struct Interpreter {
     stack_trace: Vec<StackFrame>,
     /// Memory usage statistics
     memory_stats: MemoryStats,
+    /// String dictionary manager
+    string_dict_manager: StringDictionaryManager,
 }
 
 /// Memory usage statistics
@@ -115,6 +118,7 @@ impl Interpreter {
             current_function: None,
             stack_trace: Vec::new(),
             memory_stats: MemoryStats::default(),
+            string_dict_manager: StringDictionaryManager::new(),
         }
     }
     
@@ -149,6 +153,41 @@ impl Interpreter {
         &self.memory_stats
     }
     
+    /// Get the string dictionary manager
+    pub fn get_string_dict_manager(&self) -> &StringDictionaryManager {
+        &self.string_dict_manager
+    }
+    
+    /// Get a mutable reference to the string dictionary manager
+    pub fn get_string_dict_manager_mut(&mut self) -> &mut StringDictionaryManager {
+        &mut self.string_dict_manager
+    }
+    
+    /// Load a string dictionary from a file
+    pub fn load_string_dictionary(&mut self, path: &str) -> Result<(), LangError> {
+        self.string_dict_manager.load_dictionary(path)
+    }
+    
+    /// Set a string in the current dictionary
+    pub fn set_string(&mut self, key: String, value: String) {
+        self.string_dict_manager.set_string(key, value);
+    }
+    
+    /// Get a string from the current dictionary
+    pub fn get_string(&self, key: &str) -> Option<String> {
+        self.string_dict_manager.get_string(key).map(|s| s.clone())
+    }
+    
+    /// Format a string with arguments
+    pub fn format_string(&self, key: &str, args: &[Value]) -> Result<String, LangError> {
+        // Convert Value arguments to String
+        let string_args: Vec<String> = args.iter()
+            .map(|v| v.to_string())
+            .collect();
+        
+        self.string_dict_manager.format_string(key, &string_args)
+    }
+    
     /// Interpret an AST node
     pub fn interpret(&mut self, node: &ASTNode) -> Result<Value, LangError> {
         match &node.node_type {
@@ -156,6 +195,14 @@ impl Interpreter {
             NodeType::Number(n) => Ok(Value::number(*n as f64)),
             NodeType::String(s) => Ok(Value::string(s.clone())),
             NodeType::Boolean(b) => Ok(Value::boolean(*b)),
+            NodeType::StringDictRef(key) => {
+                // Resolve string dictionary reference
+                if let Some(string_value) = self.get_string(key) {
+                    Ok(Value::string(string_value))
+                } else {
+                    Err(LangError::runtime_error(&format!("String key '{}' not found in dictionary", key)))
+                }
+            },
             NodeType::Identifier(name) => {
                 if let Some(value) = self.environment.get(name) {
                     Ok(value)
@@ -195,7 +242,20 @@ impl Interpreter {
                     arg_values.push(self.interpret(arg)?);
                 }
                 
-                // For now, just return null as a placeholder
+                // Special handling for print function with string dictionary references
+                if let NodeType::Identifier(name) = &callee.node_type {
+                    if name == "⌽" && !arguments.is_empty() {
+                        // Check if the first argument is a string dictionary reference
+                        if let NodeType::StringDictRef(key) = &arguments[0].node_type {
+                            // Format the string with the remaining arguments
+                            let formatted = self.format_string(key, &arg_values[1..])?;
+                            println!("{}", formatted);
+                            return Ok(Value::string(formatted));
+                        }
+                    }
+                }
+                
+                // For now, just return null as a placeholder for other function calls
                 Ok(Value::null())
             },
             NodeType::PropertyAccess { object, property } => {

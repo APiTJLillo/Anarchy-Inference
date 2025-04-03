@@ -1,4 +1,4 @@
-// src/ast.rs - Modified to add Null variant
+// src/ast.rs - Modified to add StringDictRef variant
 use crate::error::SourceLocation;
 use crate::lexer::Token;
 
@@ -16,6 +16,7 @@ pub enum NodeType {
     String(String),
     Boolean(bool),
     Variable(String),
+    StringDictRef(String), // New variant for string dictionary references
     Binary {
         left: Box<ASTNode>,
         operator: Token,
@@ -198,5 +199,19 @@ mod tests {
             column: 1,
         };
         assert!(matches!(node.node_type, NodeType::SetSharedState { .. }));
+    }
+    
+    #[test]
+    fn test_string_dict_ref_node() {
+        let node = ASTNode {
+            node_type: NodeType::StringDictRef("hello".to_string()),
+            line: 1,
+            column: 1,
+        };
+        if let NodeType::StringDictRef(key) = &node.node_type {
+            assert_eq!(key, "hello");
+        } else {
+            panic!("Expected StringDictRef node");
+        }
     }
 }

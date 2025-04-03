@@ -12,6 +12,7 @@ pub enum Token {
     Identifier(String),
     SymbolicOperator(char),
     SymbolicKeyword(char),
+    StringDictRef(String),  // New token type for string dictionary references
     Parenthesis(char),
     CurlyBrace(char),
     Comma,
@@ -29,6 +30,7 @@ impl Display for Token {
             Token::Identifier(name) => write!(f, "{}", name),
             Token::SymbolicOperator(c) => write!(f, "{}", c),
             Token::SymbolicKeyword(c) => write!(f, "{}", c),
+            Token::StringDictRef(key) => write!(f, ":{}", key),  // Format string dictionary reference
             Token::Parenthesis(c) => write!(f, "{}", c),
             Token::CurlyBrace(c) => write!(f, "{}", c),
             Token::Comma => write!(f, ","),
@@ -141,6 +143,11 @@ impl Lexer {
                     self.advance();
                     Token::SymbolicOperator(c)
                 }
+            },
+            ':' => {
+                // Handle string dictionary reference
+                self.advance(); // Skip the colon
+                self.read_string_dict_ref()?
             },
             '0'..='9' => self.read_number()?,
             '"' => self.read_string()?,
@@ -309,6 +316,38 @@ impl Lexer {
         Ok(Token::Identifier(identifier))
     }
 
+    /// Reads a string dictionary reference key (after the colon).
+    fn read_string_dict_ref(&mut self) -> Result<Token, LangError> {
+        let mut key = String::new();
+        
+        // First character must be a letter or underscore
+        if let Some(ch) = self.current_char() {
+            if ch.is_alphabetic() || ch == '_' {
+                key.push(ch);
+                self.advance();
+            } else {
+                return Err(LangError::syntax_error(&format!(
+                    "Invalid string dictionary key: must start with a letter or underscore, found '{}'", 
+                    ch
+                )));
+            }
+        } else {
+            return Err(LangError::syntax_error("Unexpected end of input after ':'"));
+        }
+        
+        // Rest of the key can include letters, digits, or underscores
+        while let Some(ch) = self.current_char() {
+            if ch.is_alphanumeric() || ch == '_' {
+                key.push(ch);
+                self.advance();
+            } else {
+                break;
+            }
+        }
+        
+        Ok(Token::StringDictRef(key))
+    }
+
     fn peek_next(&self) -> Option<char> {
         self.chars.get(self.position + 1).copied()
     }
@@ -336,5 +375,15 @@ mod tests {
         assert_eq!(tokens[0].token, Token::SymbolicKeyword('λ'));
         assert_eq!(tokens[1].token, Token::SymbolicKeyword('⬢'));
         assert!(matches!(tokens[2].token, Token::EOF));
+    }
+    
+    #[test]
+    fn test_string_dict_ref() {
+        let mut lexer = Lexer::new(":hello :world123 :_test".to_string());
+        let tokens = lexer.tokenize().unwrap();
+        assert_eq!(tokens[0].token, Token::StringDictRef("hello".to_string()));
+        assert_eq!(tokens[1].token, Token::StringDictRef("world123".to_string()));
+        assert_eq!(tokens[2].token, Token::StringDictRef("_test".to_string()));
+        assert!(matches!(tokens[3].token, Token::EOF));
     }
 }

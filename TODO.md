@@ -37,6 +37,7 @@
    - Library declarations with `λ`
    - Return statements with `⟼`
    - Print statements with `⌽`
+   - String dictionary system with `:key` syntax for token minimization
 
 3. Testing Infrastructure
    - Comprehensive lexer tests
@@ -58,7 +59,12 @@
    - Error handling with proper stack traces
    - Source location tracking in errors
 
-## �� Todo
+5. Token Optimization
+   - String dictionary system for text reuse
+   - Centralized string storage with `:key` reference syntax
+   - String formatting with placeholder support
+   - Multiple dictionaries with switching capability
+   - File-based dictionary loading and saving
 
 # TODO List
 
@@ -81,6 +87,7 @@
 - [x] Channel support
 - [x] Better error messages with source locations and stack traces
 - [x] Type inference
+- [x] String dictionary system for token minimization
 - [ ] Garbage collection
 - [ ] Module system improvements
 - [ ] Performance profiling
@@ -93,6 +100,7 @@
 - [x] Network tests
 - [x] Core language tests
 - [x] Coverage reports
+- [ ] String dictionary tests
 - [ ] Benchmark suite
 - [ ] Stress tests
 - [ ] Fuzzing tests
@@ -113,6 +121,7 @@
 - [x] Basic README
 - [x] Test documentation
 - [x] Language specification
+- [x] String dictionary documentation
 - [ ] API reference
 - [x] Tutorial series
 - [x] Example projects
@@ -126,11 +135,13 @@
 - [ ] Syntax highlighting
 - [ ] Multi-line editing
 - [ ] Help system
+- [ ] String dictionary support in REPL
 
 ## Low Priority
 
 ### Performance Optimization
-- [ ] Token compression
+- [x] String dictionary for token reduction
+- [ ] Additional token compression techniques
 - [ ] AST optimization
 - [ ] JIT compilation
 - [ ] Parallel execution
@@ -151,6 +162,7 @@
 - [ ] Audio support
 - [ ] Machine learning primitives
 - [x] Cryptography extensions (hash string, hash file)
+- [x] String dictionary management
 
 ## 🤖 LLM-Oriented Infrastructure
 
@@ -187,6 +199,13 @@
   - [ ] Example generation agent
   - [ ] Best practices agent
   - [ ] Testing pattern agent
+
+### String Dictionary Enhancements (Medium Priority)
+- [ ] Automatic string extraction and dictionary generation
+- [ ] Dictionary optimization and deduplication
+- [ ] Localization support with multiple language dictionaries
+- [ ] Dictionary versioning and migration tools
+- [ ] Dictionary analytics for token usage optimization
 
 ### MCP Server Infrastructure (Medium Priority)
 - [ ] Editor Integration Servers
@@ -258,15 +277,17 @@
 1. Language Hub Server (enables basic tooling)
 2. Debug and Testing Infrastructure (ensures reliability)
 3. Prebuilt Agents (facilitates adoption)
-4. Machine-Focused Documentation (supports integration)
-5. MCP Server Infrastructure (extends functionality)
-6. Distribution and Deployment (enables production use)
+4. String Dictionary Enhancements (improves token efficiency)
+5. Machine-Focused Documentation (supports integration)
+6. MCP Server Infrastructure (extends functionality)
+7. Distribution and Deployment (enables production use)
 
 ## Priority Order
 
 1. Networking Library (to enable distributed applications)
 2. Core Features (to complete basic functionality)
-3. Documentation (to facilitate contributions)
-4. Testing (to ensure reliability)
-5. REPL (for easier experimentation)
-6. Performance Optimization (after basic stability)
+3. String Dictionary System (to minimize token usage)
+4. Documentation (to facilitate contributions)
+5. Testing (to ensure reliability)
+6. REPL (for easier experimentation)
+7. Performance Optimization (after basic stability)

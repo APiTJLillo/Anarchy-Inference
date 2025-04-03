@@ -1,15 +1,18 @@
-// src/parser.rs - Modified to support Lexer integration
+// src/parser.rs - Modified to support implicit type inference
 // Parser for the minimal LLM-friendly language
 
 use crate::ast::{ASTNode, NodeType};
 use crate::error::LangError;
 use crate::lexer::{Token, TokenInfo, Lexer};
+use crate::core::implicit_types;
 use std::iter::Peekable;
 use std::vec::IntoIter;
 
 pub struct Parser {
     tokens: Peekable<IntoIter<TokenInfo>>,
     current: Option<TokenInfo>,
+    // Flag to enable implicit type inference
+    implicit_types: bool,
 }
 
 impl Parser {
@@ -17,6 +20,7 @@ impl Parser {
         let mut parser = Parser {
             tokens: tokens.into_iter().peekable(),
             current: None,
+            implicit_types: true, // Enable implicit type inference by default
         };
         parser.advance();
         parser
@@ -26,6 +30,11 @@ impl Parser {
     pub fn from_lexer(mut lexer: Lexer) -> Result<Self, LangError> {
         let tokens = lexer.tokenize()?;
         Ok(Self::new(tokens))
+    }
+    
+    // Enable or disable implicit type inference
+    pub fn set_implicit_types(&mut self, enabled: bool) {
+        self.implicit_types = enabled;
     }
 
     fn advance(&mut self) {
@@ -152,6 +161,49 @@ impl Parser {
                     let func = self.parse_function_declaration()?;
                     nodes.push(func);
                 },
+                Token::Identifier(name) if self.implicit_types => {
+                    // Handle variable declaration with implicit type inference
+                    let line = token_info.line;
+                    let column = token_info.column;
+                    let var_name = name.clone();
+                    
+                    // Consume the identifier
+                    self.advance();
+                    
+                    // Check for assignment operator
+                    if let Ok(token_info) = self.current_token() {
+                        if let Token::SymbolicOperator('=') = token_info.token {
+                            // This is a variable assignment with implicit type
+                            self.advance();
+                            
+                            // Parse the expression
+                            let expr = self.parse_expression()?;
+                            
+                            // Create an assignment node
+                            nodes.push(ASTNode {
+                                node_type: NodeType::Assignment {
+                                    name: var_name,
+                                    value: Box::new(expr),
+                                },
+                                line,
+                                column,
+                            });
+                            
+                            // Expect semicolon
+                            if let Ok(token_info) = self.current_token() {
+                                if let Token::Semicolon = token_info.token {
+                                    self.advance();
+                                }
+                            }
+                            
+                            continue;
+                        }
+                    }
+                    
+                    // If not an assignment, treat as a regular statement
+                    let stmt = self.parse_statement()?;
+                    nodes.push(stmt);
+                },
                 _ => {
                     let stmt = self.parse_statement()?;
                     nodes.push(stmt);
@@ -163,16 +215,69 @@ impl Parser {
     }
 
     fn parse_statement(&mut self) -> Result<ASTNode, LangError> {
-        // Implementation omitted for brevity
-        // This is a placeholder to make the code compile
         let token_info = self.current_token()?.clone();
-        self.advance();
         
-        Ok(ASTNode {
-            node_type: NodeType::Null,
-            line: token_info.line,
-            column: token_info.column,
-        })
+        match &token_info.token {
+            Token::StringDictRef(key) => {
+                // Handle string dictionary reference
+                let line = token_info.line;
+                let column = token_info.column;
+                
+                // Consume the string dictionary reference token
+                self.advance();
+                
+                Ok(ASTNode {
+                    node_type: NodeType::StringDictRef(key.clone()),
+                    line,
+                    column,
+                })
+            },
+            // Handle other statement types
+            _ => {
+                // Implementation for other statement types
+                // This is a placeholder to make the code compile
+                self.advance();
+                
+                Ok(ASTNode {
+                    node_type: NodeType::Null,
+                    line: token_info.line,
+                    column: token_info.column,
+                })
+            }
+        }
+    }
+    
+    fn parse_expression(&mut self) -> Result<ASTNode, LangError> {
+        let token_info = self.current_token()?.clone();
+        
+        match &token_info.token {
+            Token::StringDictRef(key) => {
+                // Handle string dictionary reference in expressions
+                let line = token_info.line;
+                let column = token_info.column;
+                
+                // Consume the string dictionary reference token
+                self.advance();
+                
+                Ok(ASTNode {
+                    node_type: NodeType::StringDictRef(key.clone()),
+                    line,
+                    column,
+                })
+            },
+            // Handle other expression types
+            _ => {
+                // Implementation for other expression types
+                // This is a placeholder to make the code compile
+                self.advance();
+                
+                Ok(ASTNode {
+                    node_type: NodeType::Null,
+                    line: token_info.line,
+                    column: token_info.column,
+                })
+            }
+        }
     }
     
     fn parse_function_declaration(&mut self) -> Result<ASTNode, LangError> {
