@@ -75,10 +75,16 @@ impl Parser {
                     // Consume the λ token
                     self.advance();
 
-                    // Next token must be an identifier for the library name
+                    // Next token can be an identifier or a symbolic keyword for the library name
                     let name = match self.current_token()? {
                         TokenInfo { token: Token::Identifier(name), .. } => {
                             let name = name.clone();
+                            self.advance();
+                            name
+                        },
+                        TokenInfo { token: Token::SymbolicKeyword(ch), .. } => {
+                            // Allow symbolic characters as library names (e.g., ⚡, ⚯, ⬢, etc.)
+                            let name = ch.to_string();
                             self.advance();
                             name
                         },
