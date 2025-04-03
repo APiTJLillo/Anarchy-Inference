@@ -57,16 +57,33 @@ A token-minimal, interpreted programming language optimized exclusively for LLM-
 - `÷` - Try-catch
 - `⚠` - Error handling
 
-### File I/O
-- `↯` - Read file
-- `↱` - Write file
+### File System Operations
+- `📂` or `d` - List directory (`📂("path")` → `[files...]`)
+- `📖` or `r` - Read file (`📖("file")` → `"contents"`)
+- `✍` or `w` - Write file (`✍("file", "contents")`)
+- `✂` or `x` - Remove file/dir (`✂("path")`)
+- `⧉` or `c` - Copy file (`⧉("src", "dst")`)
+- `↷` or `m` - Move file (`↷("src", "dst")`)
+- `?` or `e` - File exists (`?("path")` → `bool`)
+- `↯` - Read file (legacy)
+- `↱` - Write file (legacy)
 - `⌸` - File operations library
 
+### Shell & OS Process Control
+- `!` - Execute shell (`!("ls -la")` → `{o:stdout, e:stderr, c:code}`)
+- `🖥` or `s` - Current OS (`🖥()` → `"linux"`)
+- `🌐` or `v` - Env var get (`🌐("VAR_NAME")` → `"value"`)
+
 ### Security
-- `#` - Hash
+- `#` - Hash string (`#("abc", "sha256")` → `"..."`)
+- `#f` or `h` - Hash file (`h("file", "sha1")` → `"..."`)
 - `🔒` - Encrypt
 - `🔑` - Decrypt
 - `⚿` - Security library
+- `🔓_fs` - Allow file I/O
+- `📁_allow` - Limit I/O to specific directories
+- `🔓_sh` - Enable/disable shell commands
+- `🔓_net` - Enable/disable network operations
 
 ### Timers and Environment
 - `⏰` - Set timeout
@@ -81,11 +98,17 @@ A token-minimal, interpreted programming language optimized exclusively for LLM-
 
 ## Libraries
 
+### HTTP & Networking
+- `↗` or `g` - HTTP GET (`↗("https://site")` → `{s:status, b:body}`)
+- `↓` or `p` - HTTP POST (`↓("url", "body")` → `{s:status, b:body}`)
+- `⎋` or `j` - JSON parse (`⎋("{...}")` → `{key: val}`)
+- `~` - WebSocket open (`~("ws://...")` → `socket handle`)
+
 ### Networking Library (`⚡`)
 - `⊲(port, handler)` - Listen on port
 - `⇉(connection, address, port)` - Forward connection
-- `⇓(url)` - HTTP GET
-- `⇑(url, data)` - HTTP POST
+- `⇓(url)` - HTTP GET (legacy)
+- `⇑(url, data)` - HTTP POST (legacy)
 - `⥮(url, handler)` - WebSocket
 
 ### Concurrency Library (`⚯`)
@@ -95,6 +118,14 @@ A token-minimal, interpreted programming language optimized exclusively for LLM-
 - `⟰(name)` - Create shared state
 - `⇡(state, key, value)` - Set shared state value
 - `⇣(state, key)` - Get shared state value
+
+### Browser Automation
+- `🌐` or `b` - Open page (`🌐("https://site")` → `browser`)
+- `🖱` or `k` - Click selector (`🖱(browser, "#btn")`)
+- `⌨` or `i` - Input text (`⌨(browser, "#inp", "hello")`)
+- `👁` or `t` - Get text (`👁(browser, "#el")` → `"text"`)
+- `🧠` or `e` - Eval JS (`🧠(browser, "return window.title;")`)
+- `❌` or `z` - Close browser (`❌(browser)`)
 
 ### UI Library (`⬢`)
 - `□(title, width, height)` - Create window
@@ -123,6 +154,11 @@ A token-minimal, interpreted programming language optimized exclusively for LLM-
 ### Type Library (`⟑`)
 - `🔢(string)` - String to integer
 - `🔤(integer)` - Integer to string
+
+### Agent Memory
+- `📝` or `m` - Set memory (`📝("key", "val")`)
+- `📖` or `n` - Get memory (`📖("key")` → `"val"`)
+- `🗑` or `f` - Forget key (`🗑("key")`)
 
 ## Examples
 

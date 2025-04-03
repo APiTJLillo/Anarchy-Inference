@@ -150,7 +150,7 @@
 - [ ] Image processing
 - [ ] Audio support
 - [ ] Machine learning primitives
-- [ ] Cryptography extensions
+- [x] Cryptography extensions (hash string, hash file)
 
 ## 🤖 LLM-Oriented Infrastructure
 
