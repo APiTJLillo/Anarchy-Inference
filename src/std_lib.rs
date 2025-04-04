@@ -3,8 +3,7 @@
 
 use crate::interpreter::Interpreter;
 use crate::value::Value;
-use crate::core::string_dict::StringDictionary;
-use std::fs;
+// Remove unused imports
 
 /// Initialize the standard library
 pub fn init(interpreter: &mut Interpreter) {

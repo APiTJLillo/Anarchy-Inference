@@ -62,10 +62,11 @@ pub enum ComplexValueType {
     Object,
     Array,
     Function,
+    NativeFunction,
 }
 
 /// A complex value that needs reference counting
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct ComplexValue {
     /// The type of complex value
     pub value_type: ComplexValueType,
@@ -75,6 +76,35 @@ pub struct ComplexValue {
     pub array_data: Option<Vec<Value>>,
     /// Function data (if this is a function)
     pub function_data: Option<(Vec<String>, Box<ASTNode>)>,
+    /// Native function data (if this is a native function)
+    pub native_function_data: Option<Rc<dyn Fn(&mut crate::interpreter::Interpreter, Vec<Value>) -> Result<Value, LangError>>>,
+}
+
+// Custom implementation of Debug for ComplexValue to handle function types
+impl fmt::Debug for ComplexValue {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let mut debug_struct = f.debug_struct("ComplexValue");
+        debug_struct.field("value_type", &self.value_type);
+        
+        if let Some(obj) = &self.object_data {
+            debug_struct.field("object_data", obj);
+        }
+        
+        if let Some(arr) = &self.array_data {
+            debug_struct.field("array_data", arr);
+        }
+        
+        if let Some((params, _)) = &self.function_data {
+            debug_struct.field("function_params", params);
+            debug_struct.field("has_function_body", &true);
+        }
+        
+        if self.native_function_data.is_some() {
+            debug_struct.field("has_native_function", &true);
+        }
+        
+        debug_struct.finish()
+    }
 }
 
 // Custom implementation of PartialEq for ComplexValue to handle ASTNode
@@ -93,6 +123,7 @@ impl PartialEq for ComplexValue {
                 self_params == other_params
             }
         }
+        // Skip comparing native_function_data since functions can't be compared
     }
 }
 
@@ -107,6 +138,7 @@ impl ComplexValue {
             object_data: Some(HashMap::new()),
             array_data: None,
             function_data: None,
+            native_function_data: None,
         }
     }
     
@@ -117,6 +149,7 @@ impl ComplexValue {
             object_data: None,
             array_data: Some(elements),
             function_data: None,
+            native_function_data: None,
         }
     }
     
@@ -127,6 +160,21 @@ impl ComplexValue {
             object_data: None,
             array_data: None,
             function_data: Some((params, body)),
+            native_function_data: None,
+        }
+    }
+    
+    /// Create a new native function value
+    pub fn new_native_function<F>(func: F) -> Self 
+    where 
+        F: Fn(&mut crate::interpreter::Interpreter, Vec<Value>) -> Result<Value, LangError> + 'static
+    {
+        Self {
+            value_type: ComplexValueType::NativeFunction,
+            object_data: None,
+            array_data: None,
+            function_data: None,
+            native_function_data: Some(Rc::new(func)),
         }
     }
     
@@ -203,6 +251,7 @@ pub enum ValueType {
     Object,
     Array,
     Function,
+    NativeFunction,
 }
 
 /// A value in the language
@@ -260,6 +309,14 @@ impl Value {
         Self::Complex(RcComplexValue::new(ComplexValue::new_function(params, body)))
     }
     
+    /// Create a native function value
+    pub fn native_function<F>(func: F) -> Self 
+    where 
+        F: Fn(&mut crate::interpreter::Interpreter, Vec<Value>) -> Result<Value, LangError> + 'static
+    {
+        Self::Complex(RcComplexValue::new(ComplexValue::new_native_function(func)))
+    }
+    
     /// Get the type of this value
     pub fn get_type(&self) -> ValueType {
         match self {
@@ -272,6 +329,7 @@ impl Value {
                     ComplexValueType::Object => ValueType::Object,
                     ComplexValueType::Array => ValueType::Array,
                     ComplexValueType::Function => ValueType::Function,
+                    ComplexValueType::NativeFunction => ValueType::NativeFunction,
                 }
             }
         }
@@ -356,7 +414,7 @@ impl fmt::Display for Value {
             Self::Null => write!(f, "null"),
             Self::Number(n) => write!(f, "{}", n),
             Self::Boolean(b) => write!(f, "{}", b),
-            Self::String(s) => write!(f, "\"{}\"", s),
+            Self::String(s) => write!(f, "{}", s),
             Self::Complex(complex) => {
                 let borrowed = complex.borrow();
                 match borrowed.value_type {
@@ -399,8 +457,47 @@ impl fmt::Display for Value {
                             write!(f, "function() {{ ... }}")
                         }
                     },
+                    ComplexValueType::NativeFunction => {
+                        write!(f, "native_function() {{ ... }}")
+                    }
                 }
             }
         }
+    }
+}
+
+impl From<&str> for Value {
+    fn from(s: &str) -> Self {
+        Self::String(s.to_string())
+    }
+}
+
+impl From<String> for Value {
+    fn from(s: String) -> Self {
+        Self::String(s)
+    }
+}
+
+impl From<f64> for Value {
+    fn from(n: f64) -> Self {
+        Self::Number(n)
+    }
+}
+
+impl From<i32> for Value {
+    fn from(n: i32) -> Self {
+        Self::Number(n as f64)
+    }
+}
+
+impl From<bool> for Value {
+    fn from(b: bool) -> Self {
+        Self::Boolean(b)
+    }
+}
+
+impl From<LangError> for Value {
+    fn from(e: LangError) -> Self {
+        Self::String(format!("Error: {}", e))
     }
 }

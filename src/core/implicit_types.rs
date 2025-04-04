@@ -53,14 +53,14 @@ pub fn can_coerce(value: &Value, target_type: &str) -> bool {
     match (value, target_type) {
         // Number coercions
         (Value::String(s), "ι") => s.parse::<f64>().is_ok(),
-        (Value::Boolean(b), "ι") => true, // true -> 1, false -> 0
+        (Value::Boolean(_b), "ι") => true, // true -> 1, false -> 0
         
         // String coercions
         (Value::Number(_), "σ") => true,
         (Value::Boolean(_), "σ") => true,
         
         // Boolean coercions
-        (Value::Number(n), "β") => true, // 0 -> false, non-0 -> true
+        (Value::Number(_n), "β") => true, // 0 -> false, non-0 -> true
         (Value::String(s), "β") => match s.to_lowercase().as_str() {
             "true" | "yes" | "1" | "⊤" => true,
             "false" | "no" | "0" | "⊥" => true,

@@ -1,9 +1,10 @@
-// Update the managed.rs file to improve garbage collection
+// Re-export GcValue for public use
+pub use crate::core::value::GcValue;
 
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 use crate::ast::ASTNode;
-use crate::core::value::{Value, GcValue};
+use crate::core::value::Value;
 use crate::interpreter::Environment;
 
 /// Concrete implementations of complex values managed by the garbage collector

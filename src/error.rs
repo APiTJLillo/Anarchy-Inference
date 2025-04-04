@@ -228,6 +228,18 @@ impl From<io::Error> for LangError {
     }
 }
 
+// Add implementation of From<&str> for LangError
+impl From<&str> for LangError {
+    fn from(message: &str) -> Self {
+        LangError {
+            error_type: ErrorType::Runtime,
+            message: message.to_string(),
+            location: None,
+            stack_trace: Vec::new(),
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -290,5 +302,13 @@ mod tests {
             .with_stack_trace(vec![frame]);
         assert_eq!(error.stack_trace.len(), 1);
         assert_eq!(error.stack_trace[0].function, "main");
+    }
+    
+    #[test]
+    fn test_from_str() {
+        let error: LangError = "Test error".into();
+        assert!(matches!(error.error_type, ErrorType::Runtime));
+        assert_eq!(error.message, "Test error");
+        assert!(error.location.is_none());
     }
 }

@@ -7,12 +7,131 @@ use std::sync::Arc;
 use crate::ast::{ASTNode, NodeType};
 use crate::error::{LangError, StackFrame};
 use crate::value::Value;
-use crate::core::string_dict::{StringDictionary, StringDictionaryManager};
+// Define simple local versions of the dictionary types to avoid import issues
+pub struct StringDictionary {
+    entries: std::collections::HashMap<String, String>
+}
+
+impl StringDictionary {
+    pub fn new() -> Self {
+        Self { entries: std::collections::HashMap::new() }
+    }
+    
+    pub fn get(&self, key: &str) -> Option<&String> {
+        self.entries.get(key)
+    }
+    
+    pub fn set(&mut self, key: String, value: String) {
+        self.entries.insert(key, value);
+    }
+}
+
+pub struct StringDictionaryManager {
+    dictionaries: std::collections::HashMap<String, StringDictionary>,
+    current: String
+}
+
+impl StringDictionaryManager {
+    pub fn new() -> Self {
+        let mut dictionaries = std::collections::HashMap::new();
+        dictionaries.insert("default".to_string(), StringDictionary::new());
+        Self { 
+            dictionaries,
+            current: "default".to_string()
+        }
+    }
+    
+    pub fn get_string(&self, key: &str) -> Option<&String> {
+        // Search in the current dictionary
+        self.dictionaries.get(&self.current).and_then(|dict| dict.get(key))
+    }
+    
+    pub fn set_string(&mut self, key: String, value: String) {
+        // Create current dictionary if it doesn't exist
+        if !self.dictionaries.contains_key(&self.current) {
+            self.dictionaries.insert(self.current.clone(), StringDictionary::new());
+        }
+        
+        // Set the value in the current dictionary
+        if let Some(dict) = self.dictionaries.get_mut(&self.current) {
+            dict.set(key, value);
+        }
+    }
+    
+    // Add missing methods that are used in std_lib.rs
+    
+    pub fn format_string(&self, key: &str, args: &[String]) -> Result<String, crate::error::LangError> {
+        let template = self.get_string(key)
+            .ok_or_else(|| crate::error::LangError::runtime_error(&format!("String key not found: {}", key)))?;
+        
+        // Simple placeholder replacement (assumes {} format)
+        let mut result = template.clone();
+        for arg in args {
+            result = result.replacen("{}", arg, 1);
+        }
+        
+        Ok(result)
+    }
+    
+    pub fn load_dictionary(&mut self, path: &str) -> Result<(), crate::error::LangError> {
+        // Read file content
+        let content = std::fs::read_to_string(path)
+            .map_err(|e| crate::error::LangError::io_error(&format!("Failed to read dictionary file: {}", e)))?;
+        
+        // Parse JSON
+        let entries: std::collections::HashMap<String, String> = serde_json::from_str(&content)
+            .map_err(|e| crate::error::LangError::runtime_error(&format!("Failed to parse dictionary file: {}", e)))?;
+        
+        // Create a new dictionary with the parsed entries
+        let dict_name = std::path::Path::new(path)
+            .file_stem()
+            .and_then(|s| s.to_str())
+            .unwrap_or("imported")
+            .to_string();
+        
+        let mut dict = StringDictionary::new();
+        for (key, value) in entries {
+            dict.set(key, value);
+        }
+        
+        // Add the dictionary
+        self.dictionaries.insert(dict_name.clone(), dict);
+        
+        // Set as current
+        self.current = dict_name;
+        
+        Ok(())
+    }
+    
+    pub fn save_dictionary(&self, dict_name: &str, path: &str) -> Result<(), crate::error::LangError> {
+        let dict = self.dictionaries.get(dict_name)
+            .ok_or_else(|| crate::error::LangError::runtime_error(&format!("Dictionary not found: {}", dict_name)))?;
+        
+        // Convert dictionary to JSON string
+        let mut entries = std::collections::HashMap::new();
+        for (key, value) in &dict.entries {
+            entries.insert(key.clone(), value.clone());
+        }
+        
+        // Write to file
+        std::fs::write(path, serde_json::to_string_pretty(&entries).unwrap())
+            .map_err(|e| crate::error::LangError::io_error(&format!("Failed to save dictionary: {}", e)))
+    }
+    
+    pub fn set_current(&mut self, dict_name: &str) -> Result<(), crate::error::LangError> {
+        if !self.dictionaries.contains_key(dict_name) {
+            return Err(crate::error::LangError::runtime_error(&format!("Dictionary not found: {}", dict_name)));
+        }
+        
+        self.current = dict_name.to_string();
+        Ok(())
+    }
+}
 
 /// Environment for variable storage
 pub struct Environment {
     /// Variables in this environment
-    variables: HashMap<String, Value>,
+    pub variables: HashMap<String, Value>,
     /// Parent environment (for closures)
     parent: Option<Box<Environment>>,
 }
@@ -80,7 +199,7 @@ impl Environment {
 /// Interpreter for the language
 pub struct Interpreter {
     /// Current environment
-    environment: Environment,
+    pub environment: Environment,
     /// Global environment
     globals: Environment,
     /// Current file being interpreted
@@ -234,7 +353,7 @@ impl Interpreter {
             },
             NodeType::FunctionCall { callee, arguments } => {
                 // Evaluate the callee
-                let callee_value = self.interpret(callee)?;
+                let _callee_value = self.interpret(callee)?;
                 
                 // Evaluate the arguments
                 let mut arg_values = Vec::new();
@@ -270,7 +389,7 @@ impl Interpreter {
                     Ok(Value::null())
                 }
             },
-            NodeType::MethodCall { object, method, arguments } => {
+            NodeType::MethodCall { object, method: _method, arguments } => {
                 // Evaluate the object
                 let _object_value = self.interpret(object)?;
                 

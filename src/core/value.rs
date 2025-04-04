@@ -6,8 +6,9 @@ use std::sync::Arc;
 use std::collections::HashSet;
 use crate::ast::ASTNode;
 use crate::error::LangError;
-use crate::garbage_collection::managed::GcValueImpl;
+use crate::gc::managed::GcValueImpl;
 use crate::core::gc_types::GarbageCollector;
+use crate::gc::managed::GcValue as ManagedGcValue;
 
 /// Types of values in the language
 #[derive(Debug, Clone, PartialEq)]
@@ -116,7 +117,7 @@ impl Value {
                     if let GcValueImpl::Object(ref mut map) = obj_value {
                         map.insert(name, value);
                         // Update references in the GC
-                        let references = crate::garbage_collection::managed::GcValue::extract_references(&obj_value);
+                        let references = ManagedGcValue::extract_references(&obj_value);
                         gc_value.gc.update_references(gc_value.id, references);
                         Ok(())
                     } else {
@@ -161,7 +162,7 @@ impl Value {
                         if index < items.len() {
                             items[index] = value;
                             // Update references in the GC
-                            let references = crate::garbage_collection::managed::GcValue::extract_references(&arr_value);
+                            let references = ManagedGcValue::extract_references(&arr_value);
                             gc_value.gc.update_references(gc_value.id, references);
                             Ok(())
                         } else {

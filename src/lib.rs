@@ -38,7 +38,7 @@ pub fn init() -> Interpreter {
     std_lib::init(&mut interpreter);
     
     // Initialize default string dictionary
-    let mut dict_manager = interpreter.get_string_dict_manager_mut();
+    let dict_manager = interpreter.get_string_dict_manager_mut();
     dict_manager.set_string("hello".to_string(), "Hello, world!".to_string());
     dict_manager.set_string("error".to_string(), "Error: {}".to_string());
     dict_manager.set_string("success".to_string(), "Operation completed successfully: {}".to_string());
@@ -48,7 +48,7 @@ pub fn init() -> Interpreter {
 
 /// Parse and execute a program
 pub fn run(source: &str) -> Result<Value, LangError> {
-    let mut lexer = Lexer::new(source.to_string());
+    let lexer = Lexer::new(source.to_string());
     let mut parser = Parser::from_lexer(lexer)?;
     let nodes = parser.parse()?;
     
@@ -58,7 +58,7 @@ pub fn run(source: &str) -> Result<Value, LangError> {
 
 /// Parse a program
 pub fn parse(source: &str) -> Result<Vec<ASTNode>, LangError> {
-    let mut lexer = Lexer::new(source.to_string());
+    let lexer = Lexer::new(source.to_string());
     let mut parser = Parser::from_lexer(lexer)?;
     parser.parse()
 }
@@ -69,7 +69,7 @@ pub fn run_file(path: &str) -> Result<Value, LangError> {
     let source = fs::read_to_string(path)
         .map_err(|e| LangError::io_error(&format!("Failed to read file: {}", e)))?;
     
-    let mut lexer = Lexer::new(source);
+    let lexer = Lexer::new(source);
     let mut parser = Parser::from_lexer(lexer)?;
     let nodes = parser.parse()?;
     
