@@ -1,6 +1,11 @@
 // string_dict_example.a.i - Example of using string dictionary in Anarchy-Inference
 
 // First, let's define some strings in our dictionary
+// Initialize the default dictionary
+σdefault_dict="default";
+🔄(default_dict);
+
+// Define strings in the dictionary
 📝("greeting", "Hello, {}!");
 📝("farewell", "Goodbye, {}. See you soon!");
 📝("welcome", "Welcome to Anarchy-Inference!");

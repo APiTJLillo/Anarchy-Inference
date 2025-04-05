@@ -195,13 +195,23 @@ impl Lexer {
             | '⚡' | '⊲' | '⇉' | '⇓' | '⇑' | '⥮'
             | '⟿' | '⇢' | '⇠' | '⟰' | '⇡' | '⇣'
             | '✎' | '⌨'
+            // File System Operations Emoji
+            | '📂' | '📖' | '✍' | '✂' | '⧉' | '↷' | '?'
+            // Shell & OS Process Control Emoji
+            | '🖥' | '🌐'
+            // String Dictionary Operations Emoji
+            | '📝' | '🔠' | '💾' | '🔄'
+            // Agent Memory Emoji
+            | '🗑'
+            // Browser Automation Emoji
+            | '🖱' | '👁' | '🧠' | '❌'
             => {
                 self.advance();
                 Token::SymbolicKeyword(c)
             }
             // Symbolic operators
             '+' | '-' | '*' | '=' | '!' | '>' | '<' | '&'
-            | '|' | '^' | '%' | '~' => {
+            | '|' | '^' | '%' | '~' | '≥' | '≤' | '≠' | '≈' => {
                 self.advance();
                 Token::SymbolicOperator(c)
             }
