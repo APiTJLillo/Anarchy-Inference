@@ -265,6 +265,7 @@ A token-minimal, interpreted programming language optimized exclusively for LLM-
 - Type system with inference
 - Collection operations
 - Variable scoping with closure support
+- REPL mode for interactive development
 
 ### Networking Features ✅
 - TCP server/client with async support
@@ -310,6 +311,13 @@ A token-minimal, interpreted programming language optimized exclusively for LLM-
 - [ ] Contributing Guide
 - [ ] Style Guide
 
+### Recent Improvements (v0.3.0) 🆕
+- Warning suppression for clean builds
+- Enhanced interpreter with support for more node types
+- Improved string dictionary functionality
+- Better error handling and debugging output
+- Fixed emoji character recognition in lexer
+
 ### In Progress 🚧
 - Garbage collection
 - Module system improvements
@@ -317,6 +325,7 @@ A token-minimal, interpreted programming language optimized exclusively for LLM-
 - Custom UI components
 - Event system
 - Developer tools
+- Agent integration capabilities
 
 ## Implementation Details
 

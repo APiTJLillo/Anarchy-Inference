@@ -66,9 +66,31 @@
    - Multiple dictionaries with switching capability
    - File-based dictionary loading and saving
 
+6. Recent Improvements (v0.3.0)
+   - Warning suppression for clean builds
+   - Enhanced interpreter with support for more node types:
+     * Binary operations (math and comparisons)
+     * Assignment operations
+     * Variable declarations
+     * If and While control structures
+   - Improved string dictionary functionality:
+     * Better error handling
+     * Debugging output
+     * Fallback behavior for variables
+   - Fixed emoji character recognition in lexer
+   - Implemented proper REPL mode with command loop
+
 # TODO List
 
 ## High Priority
+
+### Interpreter Improvements for Agent Integration
+- [ ] Add support for user input emoji (🎤)
+- [ ] Implement module system for code organization
+- [ ] Extend string dictionary functionality for advanced memory management
+- [ ] Add interfaces for external tool integration (web, search, file system)
+- [ ] Implement agent memory management functions
+- [ ] Add support for agent reasoning operations
 
 ### Networking Library
 - [x] TCP listening (`⊲`)
@@ -100,7 +122,7 @@
 - [x] Network tests
 - [x] Core language tests
 - [x] Coverage reports
-- [ ] String dictionary tests
+- [x] String dictionary tests
 - [ ] Benchmark suite
 - [ ] Stress tests
 - [ ] Fuzzing tests
@@ -131,11 +153,12 @@
 ### REPL Implementation
 - [x] Basic command execution
 - [x] History
+- [x] Error handling
 - [ ] Tab completion
 - [ ] Syntax highlighting
 - [ ] Multi-line editing
 - [ ] Help system
-- [ ] String dictionary support in REPL
+- [x] String dictionary support in REPL
 
 ## Low Priority
 
@@ -284,10 +307,11 @@
 
 ## Priority Order
 
-1. Networking Library (to enable distributed applications)
-2. Core Features (to complete basic functionality)
-3. String Dictionary System (to minimize token usage)
-4. Documentation (to facilitate contributions)
-5. Testing (to ensure reliability)
-6. REPL (for easier experimentation)
-7. Performance Optimization (after basic stability)
+1. Interpreter Improvements for Agent Integration (to enable agent functionality)
+2. Networking Library (to enable distributed applications)
+3. Core Features (to complete basic functionality)
+4. String Dictionary System (to minimize token usage)
+5. Documentation (to facilitate contributions)
+6. Testing (to ensure reliability)
+7. REPL (for easier experimentation)
+8. Performance Optimization (after basic stability)
