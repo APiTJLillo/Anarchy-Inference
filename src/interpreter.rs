@@ -3,10 +3,10 @@
 
 use std::collections::HashMap;
 use std::fmt;
-use std::sync::Arc;
 use crate::ast::{ASTNode, NodeType};
 use crate::error::{LangError, StackFrame};
 use crate::value::Value;
+use crate::lexer::Token;
 // Define simple local versions of the dictionary types to avoid import issues
 pub struct StringDictionary {
     entries: std::collections::HashMap<String, String>
@@ -289,12 +289,54 @@ impl Interpreter {
     
     /// Set a string in the current dictionary
     pub fn set_string(&mut self, key: String, value: String) {
+        println!("Setting string: {} = {}", key, value);
         self.string_dict_manager.set_string(key, value);
     }
     
     /// Get a string from the current dictionary
     pub fn get_string(&self, key: &str) -> Option<String> {
-        self.string_dict_manager.get_string(key).map(|s| s.clone())
+        println!("Getting string: {}", key);
+        // First try to get from the current dictionary
+        let result = self.string_dict_manager.get_string(key).map(|s| s.clone());
+        
+        // If not found and we're in a function call, check if it's a variable
+        if result.is_none() {
+            if let Some(value) = self.environment.get(key) {
+                println!("Found as variable: {}", key);
+                return match value {
+                    Value::String(s) => Some(s.clone()),
+                    _ => Some(value.to_string()),
+                };
+            }
+        }
+        
+        println!("Result for {}: {:?}", key, result);
+        result
+    }
+    
+    /// Switch to a different dictionary
+    pub fn switch_dictionary(&mut self, dict_name: &str) -> Result<(), LangError> {
+        // Try to switch to the dictionary
+        // If it doesn't exist, it will return an error that we can handle
+        let result = self.string_dict_manager.set_current(dict_name);
+        
+        if result.is_err() {
+            // Create a new dictionary with this name
+            let mut new_dict = StringDictionary {
+                entries: HashMap::new()
+            };
+            
+            // Add some default entries if needed
+            new_dict.entries.insert("default_message".to_string(), "Hello from dictionary".to_string());
+            
+            // Add the dictionary to the manager
+            self.string_dict_manager.dictionaries.insert(dict_name.to_string(), new_dict);
+            
+            // Now try to switch again
+            self.string_dict_manager.set_current(dict_name)
+        } else {
+            result
+        }
     }
     
     /// Format a string with arguments
@@ -413,6 +455,58 @@ impl Interpreter {
                 let value = self.interpret(expr)?;
                 println!("{}", value);
                 Ok(value)
+            },
+            NodeType::Binary { left, operator, right } => {
+                let left_val = self.interpret(left)?;
+                let right_val = self.interpret(right)?;
+                
+                match operator {
+                    Token::SymbolicOperator('+') => Ok(left_val.add(&right_val)),
+                    Token::SymbolicOperator('-') => Ok(left_val.subtract(&right_val)),
+                    Token::SymbolicOperator('*') => Ok(left_val.multiply(&right_val)),
+                    Token::SymbolicOperator('/') => Ok(left_val.divide(&right_val)),
+                    Token::SymbolicOperator('%') => Ok(left_val.modulo(&right_val)),
+                    Token::SymbolicOperator('=') => Ok(Value::boolean(left_val.equals(&right_val))),
+                    Token::SymbolicOperator('!') => Ok(Value::boolean(!left_val.equals(&right_val))),
+                    Token::SymbolicOperator('>') => Ok(Value::boolean(left_val.greater_than(&right_val))),
+                    Token::SymbolicOperator('<') => Ok(Value::boolean(left_val.less_than(&right_val))),
+                    Token::SymbolicOperator('≥') => Ok(Value::boolean(left_val.greater_than_or_equal(&right_val))),
+                    Token::SymbolicOperator('≤') => Ok(Value::boolean(left_val.less_than_or_equal(&right_val))),
+                    Token::SymbolicOperator('≠') => Ok(Value::boolean(!left_val.equals(&right_val))),
+                    Token::SymbolicOperator('&') => Ok(Value::boolean(left_val.is_truthy() && right_val.is_truthy())),
+                    Token::SymbolicOperator('|') => Ok(Value::boolean(left_val.is_truthy() || right_val.is_truthy())),
+                    _ => Err(LangError::runtime_error(&format!("Unsupported binary operator: {}", operator))),
+                }
+            },
+            NodeType::Assignment { name, value } => {
+                let value = self.interpret(value)?;
+                self.environment.assign(name, value.clone())?;
+                Ok(value)
+            },
+            NodeType::Variable(name) => {
+                // For variable declarations without initialization, assign null
+                self.environment.define(name.clone(), Value::null());
+                Ok(Value::null())
+            },
+            NodeType::If { condition, then_branch, else_branch } => {
+                let condition_value = self.interpret(condition)?;
+                
+                if condition_value.is_truthy() {
+                    self.interpret(then_branch)
+                } else if let Some(else_branch) = else_branch {
+                    self.interpret(else_branch)
+                } else {
+                    Ok(Value::null())
+                }
+            },
+            NodeType::While { condition, body } => {
+                let mut result = Value::null();
+                
+                while self.interpret(condition)?.is_truthy() {
+                    result = self.interpret(body)?;
+                }
+                
+                Ok(result)
             },
             // Add other node types as needed
             _ => Err(LangError::runtime_error("Unsupported node type")),

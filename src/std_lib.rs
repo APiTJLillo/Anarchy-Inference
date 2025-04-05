@@ -80,8 +80,8 @@ fn init_string_dict_functions(interpreter: &mut Interpreter) {
         
         let dict_name = args[0].to_string();
         
-        let dict_manager = interpreter.get_string_dict_manager_mut();
-        dict_manager.set_current(&dict_name)?;
+        // Use the interpreter's switch_dictionary method which handles creation if needed
+        interpreter.switch_dictionary(&dict_name)?;
         
         Ok(Value::boolean(true))
     }));

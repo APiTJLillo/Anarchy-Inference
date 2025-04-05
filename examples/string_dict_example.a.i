@@ -2,13 +2,13 @@
 
 // First, let's define some strings in our dictionary
 // Initialize the default dictionary
-σdefault_dict="default";
+let default_dict = "default";
 🔄(default_dict);
 
 // Define strings in the dictionary
+📝("welcome", "Welcome to Anarchy-Inference!");
 📝("greeting", "Hello, {}!");
 📝("farewell", "Goodbye, {}. See you soon!");
-📝("welcome", "Welcome to Anarchy-Inference!");
 📝("count", "The count is: {}");
 📝("error", "Error: {}");
 📝("success", "Operation completed successfully: {}");
