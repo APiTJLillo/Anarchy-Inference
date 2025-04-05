@@ -1,6 +1,11 @@
 // src/value.rs - Modified to integrate with reference counting
 // This file contains the Value type with reference counting for complex values
 
+#![allow(dead_code)]
+#![allow(unused_variables)]
+#![allow(unused_imports)]
+#![allow(unused_mut)]
+
 use std::fmt;
 use std::collections::HashMap;
 use std::rc::Rc;

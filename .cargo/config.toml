@@ -1,0 +1,20 @@
+[build]
+rustflags = [
+    "-A", "dead_code",
+    "-A", "unused_variables",
+    "-A", "unused_imports",
+    "-A", "unused_mut",
+    "-A", "unused_assignments",
+    "-A", "unused_attributes",
+    "-A", "unreachable_code",
+    "-A", "unused_must_use",
+    "-A", "path_statements",
+    "-A", "non_snake_case",
+    "-A", "non_camel_case_types",
+    "-A", "non_upper_case_globals",
+    "-A", "improper_ctypes",
+    "-A", "missing_docs",
+    "-A", "missing_debug_implementations",
+    "-A", "variant_size_differences",
+    "-A", "warnings"
+]

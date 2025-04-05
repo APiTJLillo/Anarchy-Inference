@@ -1,3 +1,8 @@
+#![allow(dead_code)]
+#![allow(unused_variables)]
+#![allow(unused_imports)]
+#![allow(unused_mut)]
+
 use crate::error::LangError;
 use crate::lexer::Lexer;
 use crate::parser::Parser;

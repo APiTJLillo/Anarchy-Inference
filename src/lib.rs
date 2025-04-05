@@ -1,6 +1,11 @@
 // src/lib.rs - Modified to include string dictionary support
 // This file is the main entry point for the library
 
+#![allow(dead_code)]
+#![allow(unused_variables)]
+#![allow(unused_imports)]
+#![allow(unused_mut)]
+
 pub mod ast;
 pub mod error;
 pub mod lexer;
