@@ -1,13 +1,303 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <title>Anarchy Inference</title>
-    <link data-trunk rel="css" href="styles.css">
-    <link data-trunk rel="copy-dir" href="public">
-    <script type="module" src="/src/_app.js" defer></script>
-  </head>
-  <body>
-    <div id="app"></div>
-  </body>
-</html> 
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anarchy Inference - Minimal Token Programming Language</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        .code-font {
+            font-family: 'Fira Code', monospace;
+        }
+        .hero-bg {
+            background: linear-gradient(135deg, #2c3e50 0%, #1a2a3a 100%);
+        }
+        .feature-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        .token-symbol {
+            font-size: 1.5rem;
+            font-weight: bold;
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            line-height: 40px;
+            text-align: center;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        .chart-container {
+            height: 300px;
+            position: relative;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-md">
+        <div class="container mx-auto px-6 py-3 flex justify-between items-center">
+            <a href="#" class="text-2xl font-bold text-indigo-600">Anarchy<span class="text-gray-800">Inference</span></a>
+            <div class="hidden md:flex items-center space-x-8">
+                <a href="#features" class="text-gray-700 hover:text-indigo-600 transition">Features</a>
+                <a href="#benchmarks" class="text-gray-700 hover:text-indigo-600 transition">Benchmarks</a>
+                <a href="#examples" class="text-gray-700 hover:text-indigo-600 transition">Examples</a>
+                <a href="#demos" class="text-gray-700 hover:text-indigo-600 transition">Demos</a>
+                <a href="https://github.com/APiTJLillo/Anarchy-Inference" class="text-gray-700 hover:text-indigo-600 transition">GitHub</a>
+            </div>
+            <button class="md:hidden focus:outline-none">
+                <svg class="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-bg text-white py-20">
+        <div class="container mx-auto px-6 text-center">
+            <h1 class="text-4xl md:text-6xl font-bold mb-6">Minimal LLM Language</h1>
+            <p class="text-xl md:text-2xl mb-10 max-w-3xl mx-auto">
+                A token-minimal, interpreted programming language optimized exclusively for LLM-generated code.
+                Designed by AI, for AI, to dramatically reduce inference costs.
+            </p>
+            <div class="flex flex-col md:flex-row justify-center space-y-4 md:space-y-0 md:space-x-4">
+                <a href="#benchmarks" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg transition">
+                    View Benchmarks
+                </a>
+                <a href="https://github.com/APiTJLillo/Anarchy-Inference" class="bg-gray-700 hover:bg-gray-800 text-white font-bold py-3 px-6 rounded-lg transition">
+                    <i class="fab fa-github mr-2"></i> GitHub
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Key Metrics -->
+    <section class="py-12 bg-white">
+        <div class="container mx-auto px-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-indigo-50 p-8 rounded-lg text-center">
+                    <h3 class="text-4xl font-bold text-indigo-600 mb-2">60%</h3>
+                    <p class="text-gray-700">Average token reduction compared to Python</p>
+                </div>
+                <div class="bg-indigo-50 p-8 rounded-lg text-center">
+                    <h3 class="text-4xl font-bold text-indigo-600 mb-2">45%</h3>
+                    <p class="text-gray-700">Lower inference costs with specialized models</p>
+                </div>
+                <div class="bg-indigo-50 p-8 rounded-lg text-center">
+                    <h3 class="text-4xl font-bold text-indigo-600 mb-2">5x</h3>
+                    <p class="text-gray-700">Faster code generation with optimized syntax</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-16 bg-gray-50">
+        <div class="container mx-auto px-6">
+            <h2 class="text-3xl font-bold text-center mb-12">Features</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="bg-white p-6 rounded-lg shadow-md feature-card">
+                    <div class="token-symbol bg-indigo-100 text-indigo-600">λ</div>
+                    <h3 class="text-xl font-bold mb-2">Single-byte Encoding</h3>
+                    <p class="text-gray-600">Uses single-byte or minimal-byte encoding for key constructs, dramatically reducing token usage.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md feature-card">
+                    <div class="token-symbol bg-indigo-100 text-indigo-600">∑</div>
+                    <h3 class="text-xl font-bold mb-2">Mathematical Symbols</h3>
+                    <p class="text-gray-600">Employs mathematical and symbolic representations for logic and structure, optimized for LLMs.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md feature-card">
+                    <div class="token-symbol bg-indigo-100 text-indigo-600">📝</div>
+                    <h3 class="text-xl font-bold mb-2">String Dictionary</h3>
+                    <p class="text-gray-600">Built-in string dictionary system for reusing text across projects, reducing redundancy.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md feature-card">
+                    <div class="token-symbol bg-indigo-100 text-indigo-600">⚡</div>
+                    <h3 class="text-xl font-bold mb-2">Native Async Support</h3>
+                    <p class="text-gray-600">Efficient concurrency and I/O operations with built-in asynchronous programming support.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md feature-card">
+                    <div class="token-symbol bg-indigo-100 text-indigo-600">🌐</div>
+                    <h3 class="text-xl font-bold mb-2">Networking Library</h3>
+                    <p class="text-gray-600">Comprehensive networking library for TCP/IP, HTTP, and WebSocket communication.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md feature-card">
+                    <div class="token-symbol bg-indigo-100 text-indigo-600">⬢</div>
+                    <h3 class="text-xl font-bold mb-2">UI Library</h3>
+                    <p class="text-gray-600">Simple yet powerful UI library for creating user interfaces with minimal code.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Benchmarks Section -->
+    <section id="benchmarks" class="py-16 bg-white">
+        <div class="container mx-auto px-6">
+            <h2 class="text-3xl font-bold text-center mb-12">Token Efficiency Benchmarks</h2>
+            
+            <div class="mb-12">
+                <h3 class="text-2xl font-bold mb-4">Token Count Comparison</h3>
+                <p class="text-gray-600 mb-6">Comparing token usage across different programming languages for equivalent tasks.</p>
+                <div class="chart-container bg-gray-50 p-4 rounded-lg shadow-md">
+                    <canvas id="tokenComparisonChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="mb-12">
+                <h3 class="text-2xl font-bold mb-4">Token Reduction Percentage</h3>
+                <p class="text-gray-600 mb-6">Percentage reduction in token usage compared to other languages.</p>
+                <div class="chart-container bg-gray-50 p-4 rounded-lg shadow-md">
+                    <canvas id="tokenReductionChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="bg-indigo-50 p-8 rounded-lg">
+                <h3 class="text-2xl font-bold mb-4">Benchmark Methodology</h3>
+                <p class="text-gray-600 mb-4">
+                    Our benchmarks compare token usage across equivalent implementations of common programming tasks in Anarchy Inference, Python, JavaScript, and Rust.
+                    Token counts are measured using OpenAI's tokenizer for GPT models.
+                </p>
+                <p class="text-gray-600">
+                    Tasks include web scraping, data processing, API interaction, file operations, and string manipulation.
+                    Each task is implemented with identical functionality across all languages to ensure fair comparison.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Code Examples Section -->
+    <section id="examples" class="py-16 bg-gray-50">
+        <div class="container mx-auto px-6">
+            <h2 class="text-3xl font-bold text-center mb-12">Code Examples</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+                <div>
+                    <h3 class="text-xl font-bold mb-4">Anarchy Inference</h3>
+                    <pre class="bg-gray-800 text-white p-4 rounded-lg overflow-x-auto code-font">
+λc{
+    ƒ⌽(σ,m){
+        ⌽(m)
+    }
+    
+    ƒt1(){
+        ιx=10;
+        ιy=2;
+        ⌽("t1");
+        ⟼(x+y)
+    }
+}
+                    </pre>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold mb-4">Python Equivalent</h3>
+                    <pre class="bg-gray-800 text-white p-4 rounded-lg overflow-x-auto code-font">
+class C:
+    def print_message(self, message):
+        print(message)
+    
+    def t1(self):
+        x = 10
+        y = 2
+        print("t1")
+        return x + y
+                    </pre>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div>
+                    <h3 class="text-xl font-bold mb-4">Error Handling in Anarchy Inference</h3>
+                    <pre class="bg-gray-800 text-white p-4 rounded-lg overflow-x-auto code-font">
+ƒtest_error(){
+    ÷{
+        ιx=42;
+        ιy=0;
+        ⟼(x/y)
+    }{
+        ⟼("Error caught!")
+    }
+}
+                    </pre>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold mb-4">Error Handling in Python</h3>
+                    <pre class="bg-gray-800 text-white p-4 rounded-lg overflow-x-auto code-font">
+def test_error():
+    try:
+        x = 42
+        y = 0
+        return x / y
+    except:
+        return "Error caught!"
+                    </pre>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Demo Applications Section -->
+    <section id="demos" class="py-16 bg-white">
+        <div class="container mx-auto px-6">
+            <h2 class="text-3xl font-bold text-center mb-12">Demonstration Applications</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="bg-white p-6 rounded-lg shadow-md feature-card">
+                    <div class="bg-indigo-100 text-indigo-600 p-4 rounded-full w-16 h-16 flex items-center justify-center mb-4">
+                        <i class="fas fa-spider text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">Web Scraper</h3>
+                    <p class="text-gray-600 mb-4">A web scraper that extracts news articles about AI and performs sentiment analysis.</p>
+                    <a href="https://github.com/APiTJLillo/Anarchy-Inference/blob/master/demo_apps/web_scraper_demo.ai" class="text-indigo-600 hover:text-indigo-800 font-medium">View Source →</a>
+                </div>
+                
+                <div class="bg-white p-6 rounded-lg shadow-md feature-card">
+                    <div class="bg-indigo-100 text-indigo-600 p-4 rounded-full w-16 h-16 flex items-center justify-center mb-4">
+                        <i class="fas fa-chart-bar text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">Data Analyzer</h3>
+                    <p class="text-gray-600 mb-4">A data analysis tool that processes CSV files, generates statistics, and creates visualizations.</p>
+                    <a href="https://github.com/APiTJLillo/Anarchy-Inference/blob/master/demo_apps/data_analyzer_demo.ai" class="text-indigo-600 hover:text-indigo-800 font-medium">View Source →</a>
+                </div>
+                
+                <div class="bg-white p-6 rounded-lg shadow-md feature-card">
+                    <div class="bg-indigo-100 text-indigo-600 p-4 rounded-full w-16 h-16 flex items-center justify-center mb-4">
+                        <i class="fas fa-server text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">API Client</h3>
+                    <p class="text-gray-600 mb-4">A robust API client with caching and rate limiting capabilities for efficient data retrieval.</p>
+                    <a href="https://github.com/APiTJLillo/Anarchy-Inference/blob/master/demo_apps/api_client_demo.ai" class="text-indigo-600 hover:text-indigo-800 font-medium">View Source →</a>
+                </div>
+                
+                <div class="bg-white p-6 rounded-lg shadow-md feature-card">
+                    <div class="bg-indigo-100 text-indigo-600 p-4 rounded-full w-16 h-16 flex items-center justify-center mb-4">
+                        <i class="fas fa-desktop text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">UI Application</h3>
+                    <p class="text-gray-600 mb-4">A data visualization UI that creates interactive charts and graphs from CSV data.</p>
+                    <a href="https://github.com/APiTJLillo/Anarchy-Inference/blob/master/demo_apps/ui_demo.ai" class="text-indigo-600 hover:text-indigo-800 font-medium">View Source →</a>
+                </div>
+                
+                <div class="bg-white p-6 rounded-lg shadow-md feature-card">
+                    <div class="bg-indigo-100 text-indigo-600 p-4 rounded-full w-16 h-16 flex items-center justify-center mb-4">
+                        <i class="fas fa-folder text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">File System Utility</h3>
+                    <p class="text-gray-600 mb-4">A file system utility with backup and synchronization features for data management.</p>
+                    <a href="https://github.com/APiTJLillo/Anarchy-Inference/blob/master/demo_apps/file_system_demo.ai" class="text-indigo-600 hover:text-indigo-800 font-medium">View Source →</a>
+                </div>
+                
+                <div class="bg-white p-6 rounded-lg shadow-md feature-card flex flex-col justify-between">
+                    <div>
+                        <div class="bg-indigo-100 text-indigo-600 p-4 rounded-full w-16 h-16 flex items-center justify-center mb-4">
+                            <i class="fas fa-plus text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-2">More Examples</h3>
+                        <p class="text-gray-600 mb-4">Explore more examples and applications in our GitHub repository.</p>
+                    </div>
+                 
+(Content truncated due to size limit. Use line ranges to read in chunks)

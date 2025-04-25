@@ -1,0 +1,49 @@
+λws{
+    // Web scraping example in Anarchy Inference
+    // This demonstrates fetching a webpage and extracting data
+    
+    ƒmain(){
+        σurl="https://example.com";
+        ⌽("Fetching " + url);
+        
+        // Fetch webpage content
+        ξresponse=↗(url);
+        
+        ÷{
+            // Check if request was successful
+            ι(response.s≠200){
+                ⌽("Error: " + response.s);
+                ⟼(⊥);
+            }
+            
+            // Extract all paragraph text
+            σcontent=response.b;
+            ξparagraphs=∅;
+            
+            // Simple regex to extract paragraphs
+            σregex="<p>(.*?)</p>";
+            ξmatches=⚡.regex(content, regex);
+            
+            ∀(matches, φ(m){
+                ＋(paragraphs, m);
+            });
+            
+            // Print results
+            ⌽("Found " + 🔤(paragraphs.length) + " paragraphs");
+            ∀(paragraphs, φ(p, i){
+                ι(i<3){  // Only show first 3
+                    ⌽(i + ": " + p);
+                }
+            });
+            
+            // Save results to file
+            ✍("results.txt", paragraphs.join("\n"));
+            ⌽("Results saved to results.txt");
+            
+            ⟼(⊤);
+        }{
+            ⌽("Exception occurred during web scraping");
+            ⟼(⊥);
+        }
+    }
+}

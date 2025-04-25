@@ -1,1 +1,0 @@
-λ⬢{ƒ□(σ,t,w,h){⬢.□(t,w,h)}ƒ⬚(σ,t,c){⬢.⬚(t,c)}ƒ✎(σ,c){⬢.✎(c)}ƒ⌨(σ,p,e){⬢.⌨(p,e)}}λapp{ƒstart(){⬢.□("Hello World App",300,200);⬢.✎("Click the button below:");⬢.⬚("Click Me!",λ_{∇.⌽("Button clicked!");});⬢.⌨("Type something...",λinput{∇.⌽("You typed: "+input);})}}app.start(); 

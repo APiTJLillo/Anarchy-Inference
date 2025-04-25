@@ -1,0 +1,291 @@
+λapi_demo{
+    // API Client Demonstration Application in Anarchy Inference
+    // This application implements a robust API client with caching and rate limiting
+    
+    ƒmain(){
+        // Configuration
+        σapiBaseUrl = "https://api.example.com";
+        σcacheDir = "cache";
+        ιrateLimit = 5;  // requests per second
+        ιcacheExpiry = 3600;  // seconds (1 hour)
+        
+        ⌽("Anarchy Inference API Client Demo");
+        ⌽("Base URL: " + apiBaseUrl);
+        
+        ÷{
+            // Create cache directory if it doesn't exist
+            ι(!?(cacheDir)){
+                ⌽("Creating cache directory: " + cacheDir);
+                !("mkdir -p " + cacheDir);
+            }
+            
+            // Initialize API client
+            ξclient = createApiClient(apiBaseUrl, rateLimit, cacheDir, cacheExpiry);
+            
+            // Example endpoints to fetch
+            ξendpoints = [
+                "/users/1",
+                "/users/2",
+                "/posts?userId=1",
+                "/comments?postId=1",
+                "/albums?userId=1"
+            ];
+            
+            // Process each endpoint
+            ξresults = ∅;
+            
+            ∀(endpoints, φ(endpoint){
+                ⌽("\nFetching: " + endpoint);
+                
+                // Make the API request with caching and rate limiting
+                ξresponse = client.get(endpoint);
+                
+                ι(response.success){
+                    ⌽("Success! Received " + 🔤(⎋.stringify(response.data).length) + " bytes");
+                    ⌽("Cache status: " + (response.fromCache ? "HIT" : "MISS"));
+                    
+                    // Add to results
+                    results[endpoint] = {
+                        "data": response.data,
+                        "fromCache": response.fromCache,
+                        "timestamp": response.timestamp
+                    };
+                }ε{
+                    ⌽("Error: " + response.error);
+                }
+            });
+            
+            // Demonstrate parallel requests
+            ⌽("\nDemonstrating parallel requests...");
+            ξparallelEndpoints = [
+                "/todos?userId=1",
+                "/todos?userId=2",
+                "/todos?userId=3"
+            ];
+            
+            ξparallelResults = client.getParallel(parallelEndpoints);
+            
+            ⌽("Completed " + 🔤(parallelResults.length) + " parallel requests");
+            ∀(parallelResults, φ(result, i){
+                ⌽("  " + parallelEndpoints[i] + ": " + 
+                   (result.success ? "Success" : "Error") + 
+                   (result.fromCache ? " (cached)" : ""));
+                
+                // Add to results
+                results[parallelEndpoints[i]] = {
+                    "data": result.data,
+                    "fromCache": result.fromCache,
+                    "timestamp": result.timestamp
+                };
+            });
+            
+            // Save all results to file
+            σjsonResults = ⎋.stringify(results, null, 2);
+            ✍("api_results.json", jsonResults);
+            ⌽("\nResults saved to api_results.json");
+            
+            // Display cache statistics
+            ξcacheStats = client.getCacheStats();
+            
+            ⌽("\nCache Statistics:");
+            ⌽("  Total Requests: " + 🔤(cacheStats.totalRequests));
+            ⌽("  Cache Hits: " + 🔤(cacheStats.hits));
+            ⌽("  Cache Misses: " + 🔤(cacheStats.misses));
+            ⌽("  Hit Ratio: " + 🔤((cacheStats.hits / cacheStats.totalRequests * 100).toFixed(1)) + "%");
+            ⌽("  Cache Size: " + 🔤(cacheStats.size) + " entries");
+            
+            ⟼(⊤);
+        }{
+            ⌽("Error in API client: " + ⚠.message);
+            ⟼(⊥);
+        }
+    }
+    
+    // Create an API client with caching and rate limiting
+    ƒcreateApiClient(σbaseUrl, ιrateLimit, σcacheDir, ιcacheExpiry){
+        // Initialize state
+        ξrequestTimes = ∅;
+        ξcacheStats = {
+            "totalRequests": 0,
+            "hits": 0,
+            "misses": 0,
+            "size": 0
+        };
+        
+        // Helper function to enforce rate limiting
+        ƒenforceRateLimit(){
+            ιnow = Date.now();
+            
+            // Remove old requests from the tracking array
+            ξnewRequestTimes = ∅;
+            ∀(requestTimes, φ(time){
+                ι(now - time < 1000){  // Keep requests from the last second
+                    ＋(newRequestTimes, time);
+                }
+            });
+            
+            requestTimes = newRequestTimes;
+            
+            // Check if we're over the rate limit
+            ι(requestTimes.length >= rateLimit){
+                // Calculate time to wait
+                ιoldestTime = requestTimes[0];
+                ιtimeToWait = 1000 - (now - oldestTime);
+                
+                ι(timeToWait > 0){
+                    ⌽("Rate limit reached. Waiting " + 🔤(timeToWait) + "ms...");
+                    ⏰(timeToWait);
+                }
+            }
+            
+            // Add current request time
+            ＋(requestTimes, Date.now());
+        }
+        
+        // Helper function to get cache key for an endpoint
+        ƒgetCacheKey(σendpoint){
+            ⟼(endpoint.replace(/[^a-zA-Z0-9]/g, "_"));
+        }
+        
+        // Helper function to check if cache is valid
+        ƒisCacheValid(σcachePath){
+            ι(!?(cachePath)){
+                ⟼(⊥);
+            }
+            
+            // Get file modification time
+            ξfileInfo = !("stat " + cachePath);
+            ι(fileInfo.c !== 0){
+                ⟼(⊥);
+            }
+            
+            // Parse the file info to get modification time
+            σstatOutput = fileInfo.o;
+            ξmatchResult = statOutput.match(/Modify: ([0-9]+)/);
+            ι(!matchResult){
+                ⟼(⊥);
+            }
+            
+            ιmodTime = 🔢(matchResult[1]);
+            ιnow = Math.floor(Date.now() / 1000);
+            
+            // Check if cache is expired
+            ⟼(now - modTime < cacheExpiry);
+        }
+        
+        // Helper function to read from cache
+        ƒreadFromCache(σendpoint){
+            σcacheKey = getCacheKey(endpoint);
+            σcachePath = cacheDir + "/" + cacheKey + ".json";
+            
+            ι(isCacheValid(cachePath)){
+                ÷{
+                    σcacheContent = 📖(cachePath);
+                    ξcacheData = ⎋.parse(cacheContent);
+                    cacheStats.hits++;
+                    ⟼({
+                        "success": ⊤,
+                        "data": cacheData,
+                        "fromCache": ⊤,
+                        "timestamp": Date.now()
+                    });
+                }{
+                    // If there's an error reading/parsing cache, treat as miss
+                    cacheStats.misses++;
+                    ⟼(null);
+                }
+            }
+            
+            cacheStats.misses++;
+            ⟼(null);
+        }
+        
+        // Helper function to write to cache
+        ƒwriteToCache(σendpoint, ξdata){
+            σcacheKey = getCacheKey(endpoint);
+            σcachePath = cacheDir + "/" + cacheKey + ".json";
+            
+            ÷{
+                σcacheContent = ⎋.stringify(data);
+                ✍(cachePath, cacheContent);
+                
+                // Update cache size
+                ξcacheFiles = !("ls -1 " + cacheDir + " | wc -l");
+                ι(cacheFiles.c === 0){
+                    cacheStats.size = 🔢(cacheFiles.o.trim());
+                }
+            }{
+                // Ignore cache write errors
+            }
+        }
+        
+        // Main GET function
+        ƒget(σendpoint){
+            cacheStats.totalRequests++;
+            
+            // Check cache first
+            ξcachedResponse = readFromCache(endpoint);
+            ι(cachedResponse){
+                ⟼(cachedResponse);
+            }
+            
+            // Enforce rate limiting
+            enforceRateLimit();
+            
+            // Make the actual API request
+            ÷{
+                σfullUrl = baseUrl + endpoint;
+                ξresponse = ↗(fullUrl);
+                
+                ι(response.s≠200){
+                    ⟼({
+                        "success": ⊥,
+                        "error": "HTTP Error: " + response.s,
+                        "fromCache": ⊥,
+                        "timestamp": Date.now()
+                    });
+                }
+                
+                // Parse JSON response
+                ξdata = ⎋.parse(response.b);
+                
+                // Cache the response
+                writeToCahe(endpoint, data);
+                
+                ⟼({
+                    "success": ⊤,
+                    "data": data,
+                    "fromCache": ⊥,
+                    "timestamp": Date.now()
+                });
+            }{
+                ⟼({
+                    "success": ⊥,
+                    "error": "Request failed: " + ⚠.message,
+                    "fromCache": ⊥,
+                    "timestamp": Date.now()
+                });
+            }
+        }
+        
+        // Function to make parallel requests
+        ƒgetParallel(ξendpoints){
+            ξresults = ∅;
+            
+            // Process each endpoint
+            ∀(endpoints, φ(endpoint){
+                ξresponse = get(endpoint);
+                ＋(results, response);
+            });
+            
+            ⟼(results);
+        }
+        
+        // Return the client object
+        ⟼({
+            "get": get,
+            "getParallel": getParallel,
+            "getCacheStats": φ(){ ⟼(cacheStats); }
+        });
+    }
+}

@@ -1,0 +1,160 @@
+λws_demo{
+    // Web Scraper Demonstration Application in Anarchy Inference
+    // This application scrapes news articles about AI and analyzes sentiment
+    
+    ƒmain(){
+        // Configuration
+        σsearchTerm = "artificial intelligence";
+        ιmaxArticles = 5;
+        
+        ⌽("Anarchy Inference News Scraper Demo");
+        ⌽("Searching for news about: " + searchTerm);
+        
+        ÷{
+            // Initialize results array
+            ξarticles = ∅;
+            
+            // News sources to scrape
+            ξsources = [
+                {
+                    "name": "Example News",
+                    "url": "https://example.com/news",
+                    "articleSelector": "article",
+                    "titleSelector": "h2",
+                    "summarySelector": "p.summary",
+                    "dateSelector": "time"
+                }
+            ];
+            
+            // Process each news source
+            ∀(sources, φ(source){
+                ⌽("Scraping: " + source.name);
+                
+                // Fetch the webpage
+                ξresponse = ↗(source.url);
+                
+                ι(response.s≠200){
+                    ⌽("Error fetching " + source.name + ": " + response.s);
+                    ⟼();  // Continue to next source
+                }
+                
+                // Parse HTML content
+                σcontent = response.b;
+                
+                // Extract articles using selectors
+                ξarticleElements = ⚡.querySelectorAll(content, source.articleSelector);
+                
+                ∀(articleElements, φ(article, index){
+                    ι(articles.length >= maxArticles){
+                        ⟼();  // Break if we have enough articles
+                    }
+                    
+                    // Extract article details
+                    σtitle = ⚡.querySelector(article, source.titleSelector);
+                    σsummary = ⚡.querySelector(article, source.summarySelector);
+                    σdate = ⚡.querySelector(article, source.dateSelector);
+                    
+                    // Check if article is relevant to search term
+                    ι(title.toLowerCase().includes(searchTerm) || summary.toLowerCase().includes(searchTerm)){
+                        // Analyze sentiment
+                        ξsentiment = analyzeSentiment(title + " " + summary);
+                        
+                        // Add to articles array
+                        ＋(articles, {
+                            "source": source.name,
+                            "title": title,
+                            "summary": summary,
+                            "date": date,
+                            "sentiment": sentiment
+                        });
+                    }
+                });
+            });
+            
+            // Display results
+            ⌽("\nFound " + 🔤(articles.length) + " relevant articles:");
+            
+            ∀(articles, φ(article, i){
+                ⌽("\nArticle " + 🔤(i+1) + ":");
+                ⌽("  Source: " + article.source);
+                ⌽("  Title: " + article.title);
+                ⌽("  Date: " + article.date);
+                ⌽("  Summary: " + article.summary);
+                ⌽("  Sentiment: " + formatSentiment(article.sentiment));
+            });
+            
+            // Save results to file
+            σjsonResults = ⎋.stringify(articles, null, 2);
+            ✍("ai_news_results.json", jsonResults);
+            ⌽("\nResults saved to ai_news_results.json");
+            
+            // Generate summary statistics
+            ξsentiments = articles.map(φ(a){ ⟼(a.sentiment.score); });
+            ξavgSentiment = ∑(sentiments) / sentiments.length;
+            
+            ⌽("\nSummary Statistics:");
+            ⌽("  Total Articles: " + 🔤(articles.length));
+            ⌽("  Average Sentiment: " + formatSentiment({"score": avgSentiment}));
+            
+            ⟼(⊤);
+        }{
+            ⌽("Error in web scraper: " + ⚠.message);
+            ⟼(⊥);
+        }
+    }
+    
+    // Helper function to analyze sentiment of text
+    ƒanalyzeSentiment(σtext){
+        // Simple sentiment analysis based on keyword matching
+        // In a real application, this would use a more sophisticated algorithm
+        
+        ξpositiveWords = ["good", "great", "excellent", "positive", "breakthrough", "advance", "innovation"];
+        ξnegativeWords = ["bad", "poor", "negative", "concern", "risk", "danger", "threat"];
+        
+        ιpositiveScore = 0;
+        ιnegativeScore = 0;
+        
+        // Convert to lowercase for case-insensitive matching
+        σlowerText = text.toLowerCase();
+        
+        // Count positive words
+        ∀(positiveWords, φ(word){
+            ιcount = (lowerText.split(word).length - 1);
+            positiveScore += count;
+        });
+        
+        // Count negative words
+        ∀(negativeWords, φ(word){
+            ιcount = (lowerText.split(word).length - 1);
+            negativeScore += count;
+        });
+        
+        // Calculate overall sentiment score (-1 to 1)
+        ιtotalWords = positiveScore + negativeScore;
+        ιscore = totalWords > 0 ? (positiveScore - negativeScore) / totalWords : 0;
+        
+        ⟼({
+            "score": score,
+            "positive": positiveScore,
+            "negative": negativeScore
+        });
+    }
+    
+    // Helper function to format sentiment for display
+    ƒformatSentiment(ξsentiment){
+        ιscore = sentiment.score;
+        
+        σlabel = "Neutral";
+        ι(score > 0.5){
+            label = "Very Positive";
+        }ε ι(score > 0){
+            label = "Positive";
+        }ε ι(score < -0.5){
+            label = "Very Negative";
+        }ε ι(score < 0){
+            label = "Negative";
+        }
+        
+        ⟼(label + " (" + score.toFixed(2) + ")");
+    }
+}
