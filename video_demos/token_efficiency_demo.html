@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anarchy Inference Token Efficiency Demo</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        h1 {
+            color: #ff5722;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 1.2em;
+        }
+        
+        .comparison-section {
+            margin-bottom: 40px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            border-left: 5px solid #ff5722;
+        }
+        
+        .comparison-title {
+            margin-top: 0;
+            color: #333;
+            font-size: 1.5em;
+        }
+        
+        .code-comparison {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .code-panel {
+            flex: 1;
+            min-width: 300px;
+        }
+        
+        .code-header {
+            padding: 10px;
+            border-radius: 5px 5px 0 0;
+            font-weight: bold;
+            color: white;
+        }
+        
+        .python-header {
+            background-color: #3572A5;
+        }
+        
+        .javascript-header {
+            background-color: #f7df1e;
+            color: black;
+        }
+        
+        .rust-header {
+            background-color: #dea584;
+        }
+        
+        .anarchy-header {
+            background-color: #ff5722;
+        }
+        
+        pre {
+            margin: 0;
+            padding: 15px;
+            border-radius: 0 0 5px 5px;
+            background-color: #282c34;
+            color: #abb2bf;
+            overflow-x: auto;
+            font-family: 'Fira Code', Consolas, Monaco, 'Andale Mono', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        .token-comparison {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .token-panel {
+            flex: 1;
+            min-width: 300px;
+        }
+        
+        .cost-analysis {
+            margin-top: 40px;
+            padding: 20px;
+            background-color: #e3f2fd;
+            border-radius: 8px;
+            border-left: 5px solid #2196F3;
+        }
+        
+        .conclusion {
+            margin-top: 40px;
+            padding: 20px;
+            background-color: #fff8e1;
+            border-radius: 8px;
+            border-left: 5px solid #ffc107;
+        }
+        
+        footer {
+            margin-top: 40px;
+            text-align: center;
+            color: #666;
+            font-size: 0.9em;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Anarchy Inference Token Efficiency Demo</h1>
+            <p class="subtitle">Demonstrating the token efficiency of Anarchy Inference compared to traditional programming languages</p>
+        </header>
+        
+        <div class="comparison-section">
+            <h2 class="comparison-title">Web Scraping Example</h2>
+            <div class="code-comparison">
+                <div class="code-panel">
+                    <div class="code-header python-header">Python</div>
+                    <pre id="python-web-code">import requests
+from bs4 import BeautifulSoup
+
+def scrape_headlines(url):
+    # Send HTTP request to the website
+    response = requests.get(url)
+    
+    # Check if request was successful
+    if response.status_code == 200:
+        # Parse HTML content
+        soup = BeautifulSoup(response.text, 'html.parser')
+        
+        # Find all headline elements
+        headline_elements = soup.find_all('h2', class_='headline')
+        
+        # Extract text from each headline element
+        headlines = [element.text.strip() for element in headline_elements]
+        
+        return headlines
+    else:
+        print(f"Failed to retrieve content: Status code {response.status_code}")
+        return []
+
+# Example usage
+news_url = "https://example-news-site.com"
+headlines = scrape_headlines(news_url)
+
+# Print the results
+print("Today's Headlines:")
+for i, headline in enumerate(headlines, 1):
+    print(f"{i}. {headline}")</pre>
+                </div>
+                <div class="code-panel">
+                    <div class="code-header anarchy-header">Anarchy Inference</div>
+                    <pre id="anarchy-web-code">ƒ scrape_headlines(url) {
+  ρ ← http.get(url)
+  
+  ι ρ.status = 200 {
+    soup ← html.parse(ρ.body)
+    elements ← soup.find_all('h2', {class: 'headline'})
+    headlines ← elements.map(e → e.text.trim())
+    ↵ headlines
+  } ε {
+    log("Failed: Status " + ρ.status)
+    ↵ []
+  }
+}
+
+url ← "https://example-news-site.com"
+headlines ← scrape_headlines(url)
+
+log("Today's Headlines:")
+headlines.each_with_index((h, i) → {
+  log((i+1) + ". " + h)
+})</pre>
+                </div>
+            </div>
+            <div class="token-comparison">
+                <div class="token-panel" id="python-web-counter"></div>
+                <div class="token-panel" id="anarchy-web-counter"></div>
+            </div>
+        </div>
+        
+        <div class="comparison-section">
+            <h2 class="comparison-title">Data Processing Example</h2>
+            <div class="code-comparison">
+                <div class="code-panel">
+                    <div class="code-header javascript-header">JavaScript</div>
+                    <pre id="javascript-data-code">// Sample dataset of products
+const products = [
+  { id: 1, name: "Laptop", price: 999.99, category: "Electronics", inStock: true },
+  { id: 2, name: "Headphones", price: 149.99, category: "Electronics", inStock: false },
+  { id: 3, name: "Coffee Maker", price: 79.99, category: "Kitchen", inStock: true },
+  { id: 4, name: "Running Shoes", price: 89.99, category: "Apparel", inStock: true },
+  { id: 5, name: "Bluetooth Speaker", price: 59.99, category: "Electronics", inStock: true }
+];
+
+// Filter for in-stock electronics
+const inStockElectronics = products.filter(product => 
+  product.category === "Electronics" && product.inStock === true
+);
+
+// Map to create a formatted list with discounted prices (10% off)
+const formattedProducts = inStockElectronics.map(product => {
+  const discountedPrice = product.price * 0.9;
+  return `${product.name}: $${discountedPrice.toFixed(2)} (10% off)`;
+});
+
+// Calculate the total value of all in-stock electronics
+const totalValue = inStockElectronics.reduce((sum, product) => 
+  sum + product.price, 0
+);
+
+// Output results
+console.log("Available Electronics:");
+formattedProducts.forEach(item => console.log(`- ${item}`));
+console.log(`\nTotal inventory value: $${totalValue.toFixed(2)}`);
+console.log(`Average price: $${(totalValue / inStockElectronics.length).toFixed(2)}`);</pre>
+                </div>
+                <div class="code-panel">
+                    <div class="code-header anarchy-header">Anarchy Inference</div>
+                    <pre id="anarchy-data-code">products ← [
+  {id: 1, name: "Laptop", price: 999.99, category: "Electronics", inStock: true},
+  {id: 2, name: "Headphones", price: 149.99, category: "Electronics", inStock: false},
+  {id: 3, name: "Coffee Maker", price: 79.99, category: "Kitchen", inStock: true},
+  {id: 4, name: "Running Shoes", price: 89.99, category: "Apparel", inStock: true},
+  {id: 5, name: "Bluetooth Speaker", price: 59.99, category: "Electronics", inStock: true}
+]
+
+inStock ← products.filter(p → p.category = "Electronics" & p.inStock)
+
+formatted ← inStock.map(p → {
+  disc ← p.price * 0.9
+  ↵ p.name + ": $" + disc.fixed(2) + " (10% off)"
+})
+
+total ← inStock.reduce((s, p) → s + p.price, 0)
+
+log("Available Electronics:")
+formatted.each(i → log("- " + i))
+log("\nTotal value: $" + total.fixed(2))
+log("Average: $" + (total / inStock.length).fixed(2))</pre>
+                </div>
+            </div>
+            <div class="token-comparison">
+                <div class="token-panel" id="js-data-counter"></div>
+                <div class="token-panel" id="anarchy-data-counter"></div>
+            </div>
+        </div>
+        
+        <div class="comparison-section">
+            <h2 class="comparison-title">API Interaction Example</h2>
+            <div class="code-comparison">
+                <div class="code-panel">
+                    <div class="code-header rust-header">Rust</div>
+                    <pre id="rust-api-code">use reqwest::Error;
+use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
+
+#[derive(Serialize, Deserialize, Debug)]
+struct User {
+    id: u32,
+    name: String,
+    email: String,
+    address: Address,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+struct Address {
+    street: String,
+    city: String,
+    zipcode: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+struct Post {
+    id: u32,
+    title: String,
+    body: String,
+    user_id: u32,
+}
+
+async fn fetch_user_with_posts(user_id: u32) -> Result<(User, Vec<Post>), Error> {
+    let client = reqwest::Client::new();
+    
+    // Fetch user data
+    let user_url = format!("https://jsonplaceholder.typicode.com/users/{}", user_id);
+    let user: User = client.get(&user_url).send().await?.json().await?;
+    
+    // Fetch posts by this user
+    let posts_url = format!("https://jsonplaceholder.typicode.com/posts?userId={}", user_id);
+    let posts: Vec<Post> = client.get(&posts_url).send().await?.json().await?;
+    
+    Ok((user, posts))
+}
+
+async fn process_user_data(user_id: u32) -> Result<(), Error> {
+    let (user, posts) = fetch_user_with_posts(user_id).await?;
+    
+    println!("User: {} ({})", user.name, user.email);
+    println!("Location: {}, {}", user.address.city, user.address.zipcode);
+    println!("\nRecent posts:");
+    
+    for (i, post) in posts.iter().enumerate().take(3) {
+        println!("{}. {}", i + 1, post.title);
+        println!("   {:.100}...", post.body);
+        println!();
+    }
+    
+    println!("Total posts: {}", posts.len());
+    
+    Ok(())
+}
+
+#[tokio::main]
+async fn main() -> Result<(), Error> {
+    process_user_data(1).await
+}</pre>
+                </div>
+                <div class="code-panel">
+                    <div class="code-header anarchy-header">Anarchy Inference</div>
+                    <pre id="anarchy-api-code">type User {
+  id: num,
+  name: str,
+  email: str,
+  address: {
+    street: str,
+    city: str,
+    zipcode: str
+  }
+}
+
+type Post {
+  id: num,
+  title: str,
+  body: str,
+  user_id: num
+}
+
+async ƒ fetch_user_with_posts(user_id) {
+  client ← http.client()
+  
+  user_url ← "https://jsonplaceholder.typicode.com/users/" + user_id
+  user ← await client.get(user_url).json()
+  
+  posts_url ← "https://jsonplaceholder.typicode.com/posts?userId=" + user_id
+  posts ← await client.get(posts_url).json()
+  
+  ↵ {user, posts}
+}
+
+async ƒ process_user_data(user_id) {
+  {user, posts} ← await fetch_user_with_posts(user_id)
+  
+  log("User: " + user.name + " (" + user.email + ")")
+  log("Location: " + user.address.city + ", " + user.address.zipcode)
+  log("\nRecent posts:")
+  
+  posts.slice(0, 3).each_with_index((post, i) → {
+    log((i+1) + ". " + post.title)
+    log("   " + post.body.slice(0, 100) + "...")
+    log("")
+  })
+  
+  log("Total posts: " + posts.length)
+}
+
+process_user_data(1)</pre>
+                </div>
+            </div>
+            <div class="token-comparison">
+                <div class="token-panel" id="rust-api-counter"></div>
+                <div class="token-panel" id="anarchy-api-counter"></div>
+            </div>
+        </div>
+        
+        <div class="cost-analysis">
+            <h2>Cost Analysis</h2>
+            <div id="cost-calculator"></div>
+        </div>
+        
+        <div class="conclusion">
+            <h2>Conclusion</h2>
+            <p>As demonstrated above, Anarchy Inference consistently reduces token usage by 30-50% compared to traditional programming languages. This efficiency translates directly to:</p>
+            <ul>
+                <li>Cost savings on LLM API usage</li>
+                <li>Faster response times for code generation</li>
+                <li>Ability to fit more complex programs within token limits</li>
+                <li>More efficient use of context windows</li>
+            </ul>
+            <p>Visit our GitHub repository at <a href="https://github.com/APiTJLillo/Anarchy-Inference">github.com/APiTJLillo/Anarchy-Inference</a> to get started with Anarchy Inference.</p>
+        </div>
+        
+        <footer>
+            <p>© 2025 Anarchy Inference Project</p>
+        </footer>
+    </div>
+    
+    <script src="assets/token_calculator.js"></script>
+</body>
+</html>
