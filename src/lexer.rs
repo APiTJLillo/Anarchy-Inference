@@ -13,6 +13,7 @@ pub enum Token {
     SymbolicOperator(char),
     SymbolicKeyword(char),
     StringDictRef(String),  // New token type for string dictionary references
+    UserInput,              // New token type for user input emoji (🎤)
     Parenthesis(char),
     CurlyBrace(char),
     Comma,
@@ -31,6 +32,7 @@ impl Display for Token {
             Token::SymbolicOperator(c) => write!(f, "{}", c),
             Token::SymbolicKeyword(c) => write!(f, "{}", c),
             Token::StringDictRef(key) => write!(f, ":{}", key),  // Format string dictionary reference
+            Token::UserInput => write!(f, "🎤"),  // Format user input emoji
             Token::Parenthesis(c) => write!(f, "{}", c),
             Token::CurlyBrace(c) => write!(f, "{}", c),
             Token::Comma => write!(f, ","),
@@ -180,6 +182,11 @@ impl Lexer {
                 self.advance();
                 Token::BooleanLiteral(false)
             }
+            // User input emoji
+            '🎤' => {
+                self.advance();
+                Token::UserInput
+            },
             // Symbolic keywords
             '⬢' | '□' | '⬚' | '⚈' | '⟳'
             | 'λ' | 'ƒ' | 'ι' | '⟼' | '⌽' | '∞' | 'ξ' | 'σ' | '∇' | '⟑'
@@ -395,5 +402,13 @@ mod tests {
         assert_eq!(tokens[1].token, Token::StringDictRef("world123".to_string()));
         assert_eq!(tokens[2].token, Token::StringDictRef("_test".to_string()));
         assert!(matches!(tokens[3].token, Token::EOF));
+    }
+    
+    #[test]
+    fn test_user_input_emoji() {
+        let mut lexer = Lexer::new("🎤".to_string());
+        let tokens = lexer.tokenize().unwrap();
+        assert_eq!(tokens[0].token, Token::UserInput);
+        assert!(matches!(tokens[1].token, Token::EOF));
     }
 }

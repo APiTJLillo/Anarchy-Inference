@@ -1,4 +1,4 @@
-// src/ast.rs - Modified to add StringDictRef variant
+// src/ast.rs - Modified to add module system support
 use crate::error::SourceLocation;
 use crate::lexer::Token;
 
@@ -17,6 +17,7 @@ pub enum NodeType {
     Boolean(bool),
     Variable(String),
     StringDictRef(String), // New variant for string dictionary references
+    UserInput, // New variant for user input emoji (🎤)
     Binary {
         left: Box<ASTNode>,
         operator: Token,
@@ -52,6 +53,24 @@ pub enum NodeType {
     Library {
         name: String,
         functions: Vec<ASTNode>,
+    },
+    // New module system nodes
+    ModuleDeclaration {
+        name: String,
+        is_public: bool,
+        items: Vec<ASTNode>,
+    },
+    ModuleImport {
+        name: String,
+    },
+    ImportDeclaration {
+        module_path: Vec<String>,
+        items: Vec<String>,
+        import_all: bool,
+    },
+    ModulePath {
+        path: Vec<String>,
+        item: Box<ASTNode>,
     },
     Return(Option<Box<ASTNode>>),
     If {
@@ -212,6 +231,72 @@ mod tests {
             assert_eq!(key, "hello");
         } else {
             panic!("Expected StringDictRef node");
+        }
+    }
+    
+    #[test]
+    fn test_user_input_node() {
+        let node = ASTNode {
+            node_type: NodeType::UserInput,
+            line: 1,
+            column: 1,
+        };
+        assert!(matches!(node.node_type, NodeType::UserInput));
+    }
+    
+    #[test]
+    fn test_module_declaration_node() {
+        let node = ASTNode {
+            node_type: NodeType::ModuleDeclaration {
+                name: "test_module".to_string(),
+                is_public: true,
+                items: vec![],
+            },
+            line: 1,
+            column: 1,
+        };
+        if let NodeType::ModuleDeclaration { name, is_public, items } = &node.node_type {
+            assert_eq!(name, "test_module");
+            assert_eq!(*is_public, true);
+            assert_eq!(items.len(), 0);
+        } else {
+            panic!("Expected ModuleDeclaration node");
+        }
+    }
+    
+    #[test]
+    fn test_module_import_node() {
+        let node = ASTNode {
+            node_type: NodeType::ModuleImport {
+                name: "math".to_string(),
+            },
+            line: 1,
+            column: 1,
+        };
+        if let NodeType::ModuleImport { name } = &node.node_type {
+            assert_eq!(name, "math");
+        } else {
+            panic!("Expected ModuleImport node");
+        }
+    }
+    
+    #[test]
+    fn test_import_declaration_node() {
+        let node = ASTNode {
+            node_type: NodeType::ImportDeclaration {
+                module_path: vec!["math".to_string()],
+                items: vec!["add".to_string(), "subtract".to_string()],
+                import_all: false,
+            },
+            line: 1,
+            column: 1,
+        };
+        if let NodeType::ImportDeclaration { module_path, items, import_all } = &node.node_type {
+            assert_eq!(module_path, &vec!["math".to_string()]);
+            assert_eq!(items, &vec!["add".to_string(), "subtract".to_string()]);
+            assert_eq!(*import_all, false);
+        } else {
+            panic!("Expected ImportDeclaration node");
         }
     }
 }
