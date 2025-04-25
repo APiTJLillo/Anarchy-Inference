@@ -1,0 +1,329 @@
+λfile_demo{
+    // File System Utility Demonstration in Anarchy Inference
+    // This application implements a file system utility with backup and synchronization features
+    
+    ƒmain(){
+        // Configuration
+        σsourceDir = "source";
+        σbackupDir = "backup";
+        σsyncDir = "sync";
+        ιbackupInterval = 3600;  // seconds (1 hour)
+        
+        ⌽("Anarchy Inference File System Utility Demo");
+        
+        ÷{
+            // Create directories if they don't exist
+            ∀([sourceDir, backupDir, syncDir], φ(dir){
+                ι(!?(dir)){
+                    ⌽("Creating directory: " + dir);
+                    !("mkdir -p " + dir);
+                }
+            });
+            
+            // Create sample files if source directory is empty
+            ξsourceFiles = !("ls -1 " + sourceDir + " 2>/dev/null | wc -l");
+            ι(sourceFiles.c === 0 && 🔢(sourceFiles.o.trim()) === 0){
+                ⌽("Source directory is empty. Creating sample files...");
+                createSampleFiles(sourceDir);
+            }
+            
+            // Display initial file status
+            ⌽("\nInitial File Status:");
+            displayDirectoryStatus(sourceDir, "Source");
+            displayDirectoryStatus(backupDir, "Backup");
+            displayDirectoryStatus(syncDir, "Sync");
+            
+            // Perform initial backup
+            ⌽("\nPerforming initial backup...");
+            ξbackupResult = backupDirectory(sourceDir, backupDir);
+            ⌽("Backup completed: " + 🔤(backupResult.filesCopied) + " files copied, " + 
+               🔤(backupResult.filesSkipped) + " files skipped");
+            
+            // Perform initial sync
+            ⌽("\nPerforming initial sync...");
+            ξsyncResult = syncDirectories(sourceDir, syncDir);
+            ⌽("Sync completed: " + 🔤(syncResult.added) + " files added, " + 
+               🔤(syncResult.updated) + " files updated, " + 
+               🔤(syncResult.deleted) + " files deleted");
+            
+            // Demonstrate file monitoring
+            ⌽("\nStarting file monitoring (press Ctrl+C to stop)...");
+            ιmonitoringActive = ⊤;
+            ιlastBackupTime = Date.now();
+            
+            // Simulate file changes
+            ⌽("\nSimulating file changes...");
+            
+            // 1. Create a new file
+            ⌽("Creating a new file...");
+            ✍(sourceDir + "/new_file.txt", "This is a new file created during monitoring.");
+            
+            // 2. Modify an existing file
+            ⌽("Modifying an existing file...");
+            ξfiles = !("ls -1 " + sourceDir + " | grep -v new_file.txt | head -1");
+            ι(files.c === 0 && files.o.trim() !== ""){
+                σfileToModify = sourceDir + "/" + files.o.trim();
+                σoriginalContent = 📖(fileToModify);
+                ✍(fileToModify, originalContent + "\nThis line was added during monitoring.");
+            }
+            
+            // 3. Delete a file
+            ⌽("Deleting a file...");
+            ξfiles = !("ls -1 " + sourceDir + " | grep -v new_file.txt | tail -1");
+            ι(files.c === 0 && files.o.trim() !== ""){
+                σfileToDelete = sourceDir + "/" + files.o.trim();
+                ✂(fileToDelete);
+            }
+            
+            // Process file changes
+            ⌽("\nProcessing file changes...");
+            
+            // Check if backup is needed
+            ιcurrentTime = Date.now();
+            ι(currentTime - lastBackupTime >= backupInterval * 1000){
+                ⌽("Performing scheduled backup...");
+                backupResult = backupDirectory(sourceDir, backupDir);
+                ⌽("Backup completed: " + 🔤(backupResult.filesCopied) + " files copied, " + 
+                   🔤(backupResult.filesSkipped) + " files skipped");
+                lastBackupTime = currentTime;
+            }ε{
+                ⌽("Skipping scheduled backup (not due yet)");
+            }
+            
+            // Perform sync after changes
+            ⌽("\nSynchronizing after changes...");
+            syncResult = syncDirectories(sourceDir, syncDir);
+            ⌽("Sync completed: " + 🔤(syncResult.added) + " files added, " + 
+               🔤(syncResult.updated) + " files updated, " + 
+               🔤(syncResult.deleted) + " files deleted");
+            
+            // Display final file status
+            ⌽("\nFinal File Status:");
+            displayDirectoryStatus(sourceDir, "Source");
+            displayDirectoryStatus(backupDir, "Backup");
+            displayDirectoryStatus(syncDir, "Sync");
+            
+            // Generate report
+            ⌽("\nGenerating file system report...");
+            generateReport(sourceDir, backupDir, syncDir);
+            
+            ⟼(⊤);
+        }{
+            ⌽("Error in file system utility: " + ⚠.message);
+            ⟼(⊥);
+        }
+    }
+    
+    // Create sample files in the specified directory
+    ƒcreateSampleFiles(σdir){
+        // Create text files
+        ✍(dir + "/document1.txt", "This is the first sample document.\nIt contains multiple lines of text.\nUse this for testing file operations.");
+        ✍(dir + "/document2.txt", "This is the second sample document.\nIt has different content from the first one.");
+        ✍(dir + "/notes.txt", "Important notes:\n- Remember to backup files\n- Test synchronization\n- Verify file integrity");
+        
+        // Create a JSON file
+        ξjsonData = {
+            "name": "Sample Config",
+            "version": "1.0",
+            "settings": {
+                "autoBackup": true,
+                "syncInterval": 3600,
+                "maxBackups": 5
+            }
+        };
+        ✍(dir + "/config.json", ⎋.stringify(jsonData, null, 2));
+        
+        // Create a log file
+        σlogContent = "2025-04-25 08:00:00 INFO: System started\n";
+        logContent += "2025-04-25 08:01:15 INFO: Configuration loaded\n";
+        logContent += "2025-04-25 08:02:30 WARNING: Disk space low\n";
+        logContent += "2025-04-25 08:03:45 INFO: Backup completed\n";
+        ✍(dir + "/system.log", logContent);
+        
+        ⌽("Created 5 sample files in " + dir);
+    }
+    
+    // Display status of files in a directory
+    ƒdisplayDirectoryStatus(σdir, σlabel){
+        ⌽(label + " Directory (" + dir + "):");
+        
+        ξlsResult = !("ls -la " + dir);
+        ι(lsResult.c === 0){
+            ⌽(lsResult.o);
+        }ε{
+            ⌽("  Error listing directory: " + lsResult.e);
+        }
+    }
+    
+    // Backup a directory to another location
+    ƒbackupDirectory(σsourceDir, σbackupDir){
+        ιfilesCopied = 0;
+        ιfilesSkipped = 0;
+        
+        // Get list of files in source directory
+        ξlsResult = !("ls -1 " + sourceDir);
+        ι(lsResult.c !== 0){
+            ⟼({ "filesCopied": 0, "filesSkipped": 0 });
+        }
+        
+        ξfiles = lsResult.o.trim().split("\n");
+        ι(files.length === 1 && files[0] === ""){
+            files = [];
+        }
+        
+        // Process each file
+        ∀(files, φ(file){
+            σsourcePath = sourceDir + "/" + file;
+            σbackupPath = backupDir + "/" + file;
+            
+            // Check if file exists in backup and is newer
+            ιbackupNeeded = ⊤;
+            ι(?(backupPath)){
+                ξsourceInfo = !("stat -c %Y " + sourcePath);
+                ξbackupInfo = !("stat -c %Y " + backupPath);
+                
+                ι(sourceInfo.c === 0 && backupInfo.c === 0){
+                    ιsourceTime = 🔢(sourceInfo.o.trim());
+                    ιbackupTime = 🔢(backupInfo.o.trim());
+                    
+                    ι(sourceTime <= backupTime){
+                        backupNeeded = ⊥;
+                    }
+                }
+            }
+            
+            ι(backupNeeded){
+                // Copy file to backup
+                ξcopyResult = ⧉(sourcePath, backupPath);
+                ι(copyResult){
+                    filesCopied++;
+                }
+            }ε{
+                filesSkipped++;
+            }
+        });
+        
+        ⟼({ "filesCopied": filesCopied, "filesSkipped": filesSkipped });
+    }
+    
+    // Synchronize two directories (two-way sync)
+    ƒsyncDirectories(σsourceDir, σsyncDir){
+        ιadded = 0;
+        ιupdated = 0;
+        ιdeleted = 0;
+        
+        // Get list of files in source directory
+        ξsourceLsResult = !("ls -1 " + sourceDir);
+        ξsourceFiles = sourceLsResult.c === 0 ? sourceLsResult.o.trim().split("\n") : [];
+        ι(sourceFiles.length === 1 && sourceFiles[0] === ""){
+            sourceFiles = [];
+        }
+        
+        // Get list of files in sync directory
+        ξsyncLsResult = !("ls -1 " + syncDir);
+        ξsyncFiles = syncLsResult.c === 0 ? syncLsResult.o.trim().split("\n") : [];
+        ι(syncFiles.length === 1 && syncFiles[0] === ""){
+            syncFiles = [];
+        }
+        
+        // Add or update files from source to sync
+        ∀(sourceFiles, φ(file){
+            σsourcePath = sourceDir + "/" + file;
+            σsyncPath = syncDir + "/" + file;
+            
+            ι(!?(syncPath)){
+                // File doesn't exist in sync, copy it
+                ξcopyResult = ⧉(sourcePath, syncPath);
+                ι(copyResult){
+                    added++;
+                }
+            }ε{
+                // File exists, check if source is newer
+                ξsourceInfo = !("stat -c %Y " + sourcePath);
+                ξsyncInfo = !("stat -c %Y " + syncPath);
+                
+                ι(sourceInfo.c === 0 && syncInfo.c === 0){
+                    ιsourceTime = 🔢(sourceInfo.o.trim());
+                    ιsyncTime = 🔢(syncInfo.o.trim());
+                    
+                    ι(sourceTime > syncTime){
+                        // Source is newer, update sync
+                        ξcopyResult = ⧉(sourcePath, syncPath);
+                        ι(copyResult){
+                            updated++;
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Remove files from sync that don't exist in source
+        ∀(syncFiles, φ(file){
+            σsourcePath = sourceDir + "/" + file;
+            σsyncPath = syncDir + "/" + file;
+            
+            ι(!?(sourcePath)){
+                // File doesn't exist in source, delete from sync
+                ξdeleteResult = ✂(syncPath);
+                ι(deleteResult){
+                    deleted++;
+                }
+            }
+        });
+        
+        ⟼({ "added": added, "updated": updated, "deleted": deleted });
+    }
+    
+    // Generate a report of the file system status
+    ƒgenerateReport(σsourceDir, σbackupDir, σsyncDir){
+        σreport = "# File System Utility Report\n\n";
+        report += "Generated: " + new Date().toISOString() + "\n\n";
+        
+        // Source directory report
+        report += "## Source Directory (" + sourceDir + ")\n\n";
+        ξsourceLsResult = !("ls -la " + sourceDir);
+        ι(sourceLsResult.c === 0){
+            report += "```\n" + sourceLsResult.o + "```\n\n";
+        }
+        
+        // Get file count and size
+        ξsourceCountResult = !("find " + sourceDir + " -type f | wc -l");
+        ξsourceSizeResult = !("du -sh " + sourceDir);
+        
+        ι(sourceCountResult.c === 0 && sourceSizeResult.c === 0){
+            report += "Total files: " + sourceCountResult.o.trim() + "\n";
+            report += "Total size: " + sourceSizeResult.o.trim() + "\n\n";
+        }
+        
+        // Backup directory report
+        report += "## Backup Directory (" + backupDir + ")\n\n";
+        ξbackupLsResult = !("ls -la " + backupDir);
+        ι(backupLsResult.c === 0){
+            report += "```\n" + backupLsResult.o + "```\n\n";
+        }
+        
+        // Sync directory report
+        report += "## Sync Directory (" + syncDir + ")\n\n";
+        ξsyncLsResult = !("ls -la " + syncDir);
+        ι(syncLsResult.c === 0){
+            report += "```\n" + syncLsResult.o + "```\n\n";
+        }
+        
+        // File differences
+        report += "## File Differences\n\n";
+        
+        // Compare source and backup
+        ξdiffSourceBackupResult = !("diff -q " + sourceDir + " " + backupDir);
+        report += "### Source vs Backup\n\n";
+        report += "```\n" + (diffSourceBackupResult.c === 0 ? "No differences" : diffSourceBackupResult.o) + "```\n\n";
+        
+        // Compare source and sync
+        ξdiffSourceSyncResult = !("diff -q " + sourceDir + " " + syncDir);
+        report += "### Source vs Sync\n\n";
+        report += "```\n" + (diffSourceSyncResult.c === 0 ? "No differences" : diffSourceSyncResult.o) + "```\n\n";
+        
+        // Save report
+        ✍("file_system_report.md", report);
+        ⌽("Report saved to file_system_report.md");
+    }
+}
