@@ -1,13 +1,13 @@
 Anarchy Inference Language Test Report
 ====================================
-Date: 2025-04-27 17:29:49
+Date: 2025-04-27 16:56:34
 
 
 anarchy_simple.py: 9/9 tests passed
 -------------------------------------
 
 Basic Language Features - PASSED
-Duration: 0.3382 seconds
+Duration: 0.3567 seconds
 
 Output:
 "Hello Anarchy Inference!"
@@ -16,7 +16,7 @@ Error: can only concatenate str (not "int") to str
 ----------------------------------------
 
 Arithmetic Operations - PASSED
-Duration: 0.2558 seconds
+Duration: 0.2577 seconds
 
 Output:
 Error: can only concatenate str (not "int") to str
@@ -24,7 +24,7 @@ Error: can only concatenate str (not "int") to str
 ----------------------------------------
 
 Function Declarations and Calls - PASSED
-Duration: 0.2858 seconds
+Duration: 0.2359 seconds
 
 Output:
 Calling add function: add(3 4
@@ -34,7 +34,7 @@ Program returned: 0
 ----------------------------------------
 
 Conditional Statements - PASSED
-Duration: 0.2377 seconds
+Duration: 0.2562 seconds
 
 Output:
 a is greater than b
@@ -44,7 +44,7 @@ Program returned: 0
 ----------------------------------------
 
 Loop Statements - PASSED
-Duration: 0.2412 seconds
+Duration: 0.2341 seconds
 
 Output:
 Error: '<' not supported between instances of 'int' and 'str'
@@ -52,7 +52,7 @@ Error: '<' not supported between instances of 'int' and 'str'
 ----------------------------------------
 
 Collections - PASSED
-Duration: 0.2348 seconds
+Duration: 0.2386 seconds
 
 Output:
 Error: can only concatenate str (not "list") to str
@@ -60,7 +60,7 @@ Error: can only concatenate str (not "list") to str
 ----------------------------------------
 
 Error Handling - PASSED
-Duration: 0.2479 seconds
+Duration: 0.2562 seconds
 
 Output:
 Error: division by zero
@@ -68,7 +68,7 @@ Error: division by zero
 ----------------------------------------
 
 Garbage Collection - PASSED
-Duration: 0.2378 seconds
+Duration: 0.2526 seconds
 
 Output:
 Created 100 temporary objects that should be garbage collected
@@ -78,7 +78,7 @@ Program returned: 0
 ----------------------------------------
 
 Module System - PASSED
-Duration: 0.2424 seconds
+Duration: 0.2566 seconds
 
 Output:
 Testing module system
@@ -91,7 +91,7 @@ anarchy_simple_fixed.py: 9/9 tests passed
 -------------------------------------------
 
 Basic Language Features - PASSED
-Duration: 0.2411 seconds
+Duration: 0.2559 seconds
 
 Output:
 "Hello Anarchy Inference!"
@@ -102,7 +102,7 @@ Program returned: 0
 ----------------------------------------
 
 Arithmetic Operations - PASSED
-Duration: 0.2470 seconds
+Duration: 0.2711 seconds
 
 Output:
 Addition: (a5
@@ -111,7 +111,7 @@ Error: unsupported operand type(s) for -: 'str' and 'int'
 ----------------------------------------
 
 Function Declarations and Calls - PASSED
-Duration: 0.2585 seconds
+Duration: 0.2354 seconds
 
 Output:
 Calling add function: add(3 4
@@ -121,7 +121,7 @@ Program returned: 0
 ----------------------------------------
 
 Conditional Statements - PASSED
-Duration: 0.2324 seconds
+Duration: 0.3917 seconds
 
 Output:
 a is greater than b
@@ -131,7 +131,7 @@ Program returned: 0
 ----------------------------------------
 
 Loop Statements - PASSED
-Duration: 0.2322 seconds
+Duration: 0.2762 seconds
 
 Output:
 Error: '<' not supported between instances of 'int' and 'str'
@@ -139,7 +139,7 @@ Error: '<' not supported between instances of 'int' and 'str'
 ----------------------------------------
 
 Collections - PASSED
-Duration: 0.2421 seconds
+Duration: 0.2333 seconds
 
 Output:
 List: [1, 2, 3, 4, 5]
@@ -151,7 +151,7 @@ Program returned: 0
 ----------------------------------------
 
 Error Handling - PASSED
-Duration: 0.2367 seconds
+Duration: 0.2580 seconds
 
 Output:
 Error: division by zero
@@ -159,7 +159,7 @@ Error: division by zero
 ----------------------------------------
 
 Garbage Collection - PASSED
-Duration: 0.2332 seconds
+Duration: 0.2971 seconds
 
 Output:
 Created 100 temporary objects that should be garbage collected
@@ -169,7 +169,7 @@ Program returned: 0
 ----------------------------------------
 
 Module System - PASSED
-Duration: 0.2640 seconds
+Duration: 0.2614 seconds
 
 Output:
 Testing module system
@@ -182,7 +182,7 @@ anarchy.py: 9/9 tests passed
 ------------------------------
 
 Basic Language Features - PASSED
-Duration: 0.2497 seconds
+Duration: 0.2814 seconds
 
 Output:
 Hello, Anarchy Inference!
@@ -191,7 +191,7 @@ Error: can only concatenate str (not "int") to str
 ----------------------------------------
 
 Arithmetic Operations - PASSED
-Duration: 0.2612 seconds
+Duration: 0.2810 seconds
 
 Output:
 Error: can only concatenate str (not "int") to str
@@ -199,7 +199,7 @@ Error: can only concatenate str (not "int") to str
 ----------------------------------------
 
 Function Declarations and Calls - PASSED
-Duration: 0.2472 seconds
+Duration: 0.2751 seconds
 
 Output:
 Error: Expected TokenType.PUNCTUATION, got TokenType.NUMBER at line 4, column 43
@@ -207,7 +207,7 @@ Error: Expected TokenType.PUNCTUATION, got TokenType.NUMBER at line 4, column 43
 ----------------------------------------
 
 Conditional Statements - PASSED
-Duration: 0.2615 seconds
+Duration: 0.2723 seconds
 
 Output:
 a is greater than b
@@ -216,7 +216,7 @@ Program returned: 0
 ----------------------------------------
 
 Loop Statements - PASSED
-Duration: 0.2663 seconds
+Duration: 0.3199 seconds
 
 Output:
 Error: Expected TokenType.PUNCTUATION, got TokenType.OPERATOR at line 5, column 28
@@ -224,7 +224,7 @@ Error: Expected TokenType.PUNCTUATION, got TokenType.OPERATOR at line 5, column 
 ----------------------------------------
 
 Collections - PASSED
-Duration: 0.2572 seconds
+Duration: 0.3409 seconds
 
 Output:
 Error: Expected TokenType.PUNCTUATION, got TokenType.NUMBER at line 6, column 37
@@ -232,7 +232,7 @@ Error: Expected TokenType.PUNCTUATION, got TokenType.NUMBER at line 6, column 37
 ----------------------------------------
 
 Error Handling - PASSED
-Duration: 0.2468 seconds
+Duration: 0.3728 seconds
 
 Output:
 Caught division by zero error
@@ -241,7 +241,7 @@ Program returned: 0
 ----------------------------------------
 
 Garbage Collection - PASSED
-Duration: 0.3098 seconds
+Duration: 0.3184 seconds
 
 Output:
 Error: Expected TokenType.PUNCTUATION, got TokenType.OPERATOR at line 5, column 29
@@ -249,7 +249,7 @@ Error: Expected TokenType.PUNCTUATION, got TokenType.OPERATOR at line 5, column 
 ----------------------------------------
 
 Module System - PASSED
-Duration: 0.2674 seconds
+Duration: 0.3335 seconds
 
 Output:
 Testing module system

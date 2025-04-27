@@ -370,8 +370,8 @@ A token-minimal, interpreted programming language optimized exclusively for LLM-
 cargo run program.a.i
 
 # Run tests
-cargo run tests.a.i
-cargo run network_tests.a.i
+cargo run tests/test.a.i
+cargo run tests/network_tests.a.i
 
 # Start REPL
 cargo run repl
@@ -393,6 +393,9 @@ Built artifacts will be located in:
 ## Documentation
 - [Test Documentation](TESTS.md) - Comprehensive test coverage
 - [TODO List](TODO.md) - Development roadmap
+- [Language Reference](docs/language_reference.md) - Detailed language specification
+- [Stress Testing](docs/stress_testing.md) - Stress testing framework documentation
+- [Fuzzing Tests](docs/fuzzing_tests_design.md) - Fuzzing framework documentation
 
 ## License
 

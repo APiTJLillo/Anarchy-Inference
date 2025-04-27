@@ -215,9 +215,9 @@ m{
     
     # Define interpreters to test
     interpreters = [
-        {"name": "anarchy_simple.py", "path": "anarchy_simple.py"},
-        {"name": "anarchy_simple_fixed.py", "path": "anarchy_simple_fixed.py"},
-        {"name": "anarchy.py", "path": "anarchy.py"}
+        {"name": "anarchy_simple.py", "path": "interpreters/anarchy_simple.py"},
+        {"name": "anarchy_simple_fixed.py", "path": "interpreters/anarchy_simple_fixed.py"},
+        {"name": "anarchy.py", "path": "interpreters/anarchy.py"}
     ]
     
     # Run tests for each interpreter
