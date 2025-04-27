@@ -149,14 +149,14 @@
 - ✅ Add support for agent reasoning operations
 
 #### Core Features
-- ⏳ Garbage collection
-- ⏳ Module system improvements
-- ⏳ Performance profiling
-- ⏳ Macros
+- ✅ Garbage collection
+- ✅ Module system improvements
+- ✅ Performance profiling
+- ✅ Macros
 
 #### Testing
-- ⏳ Benchmark suite
-- ⏳ Stress tests
+- ✅ Benchmark suite
+- ✅ Stress tests
 - ⏳ Fuzzing tests
 
 #### LLM-Oriented Infrastructure
