@@ -1,0 +1,56 @@
+// Web request example in Anarchy Inference
+// Tests the interpreter's HTTP capabilities
+
+m{
+  main(){
+    // Test HTTP GET request
+    url = "https://jsonplaceholder.typicode.com/todos/1";
+    print("Fetching data from:", url);
+    
+    try{
+      response = get(url);
+      
+      if(response.code == 200){
+        print("Request successful!");
+        print("Response status:", response.code);
+        print("Response body:", response.body);
+        
+        // Parse JSON response
+        data = JSON.parse(response.body);
+        print("\nParsed data:");
+        print("Title:", data.title);
+        print("Completed:", data.completed);
+        
+        // Write response to file
+        write("api_response.json", JSON.stringify(data, 2));
+        print("Response saved to api_response.json");
+      }else{
+        print("Request failed with status:", response.code);
+      }
+      
+      // Test multiple requests
+      print("\nFetching multiple todos...");
+      todos = [];
+      
+      for(i=1; i<=5; i++){
+        todo_url = "https://jsonplaceholder.typicode.com/todos/" + i;
+        todo_response = get(todo_url);
+        
+        if(todo_response.code == 200){
+          todo_data = JSON.parse(todo_response.body);
+          todos.push(todo_data);
+          print("Fetched todo #" + i + ": " + todo_data.title);
+        }
+      }
+      
+      // Save all todos to file
+      write("todos.json", JSON.stringify(todos, 2));
+      print("All todos saved to todos.json");
+      
+      return 0;
+    }catch(err){
+      print("Error occurred during HTTP request:", err);
+      return 1;
+    }
+  }
+}

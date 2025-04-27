@@ -1,0 +1,57 @@
+// Hello World example in Anarchy Inference
+// This is a simple test program for the interpreter
+
+m{
+  main(){
+    print("Hello, Anarchy Inference!");
+    
+    // Test variable assignment
+    x = 42;
+    y = 3.14;
+    name = "World";
+    
+    // Test arithmetic operations
+    sum = x + y;
+    print("Sum:", sum);
+    
+    // Test string concatenation
+    greeting = "Hello, " + name + "!";
+    print(greeting);
+    
+    // Test conditional statement
+    if(x > 40){
+      print("x is greater than 40");
+    }else{
+      print("x is not greater than 40");
+    }
+    
+    // Test loops
+    print("Counting from 1 to 5:");
+    for(i=1; i<=5; i++){
+      print(i);
+    }
+    
+    // Test array
+    numbers = [1, 2, 3, 4, 5];
+    print("Array length:", numbers.length);
+    
+    // Test function call
+    result = calculate(10, 5);
+    print("Calculation result:", result);
+    
+    return 0;
+  }
+  
+  calculate(a, b){
+    // Test return statement
+    sum = a + b;
+    product = a * b;
+    difference = a - b;
+    
+    return {
+      sum: sum,
+      product: product,
+      difference: difference
+    };
+  }
+}

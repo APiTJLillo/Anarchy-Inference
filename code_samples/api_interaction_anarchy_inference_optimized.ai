@@ -1,0 +1,61 @@
+// API interaction example in Anarchy Inference (Optimized for token efficiency)
+// Revised based on tokenization analysis
+
+m{
+  main(){
+    // API endpoint and parameters
+    base="https://api.example.com/v1";
+    endpoint="/users";
+    params={limit:10, sort:"name"};
+    
+    try{
+      // Build query string
+      query="?";
+      for(key in params){
+        if(query!="?") query+="&";
+        query+=key+"="+params[key];
+      }
+      
+      // Make API request
+      print("Fetching "+base+endpoint+query);
+      resp=get(base+endpoint+query, {
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer api_key_here"
+        }
+      });
+      
+      // Check response
+      if(resp.code!=200){
+        print("API Error: "+resp.code);
+        return 0;
+      }
+      
+      // Parse response
+      data=JSON.parse(resp.body);
+      
+      // Process results
+      print("Retrieved "+data.users.length+" users");
+      
+      // Display user information
+      for(i=0;i<data.users.length;i++){
+        user=data.users[i];
+        print("User "+i+": "+user.name+" ("+user.email+")");
+      }
+      
+      // Save results to cache
+      cache={
+        timestamp: Date.now(),
+        data: data
+      };
+      
+      write("api_cache.json", JSON.stringify(cache));
+      print("Results cached to api_cache.json");
+      
+      return 1;
+    }catch(err){
+      print("Error: "+err);
+      return 0;
+    }
+  }
+}

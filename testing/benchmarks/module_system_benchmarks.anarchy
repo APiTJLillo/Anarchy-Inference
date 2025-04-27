@@ -1,0 +1,110 @@
+// Module System Benchmarks for Anarchy Inference
+
+// Module loading benchmark
+ι benchmark_module_loading() ⟼ {
+    for (ι i = 0; i < 100; i = i + 1) {
+        ⟑ math::{sin, cos, tan};
+        ⟑ string::{length, substring, concat};
+        ⟑ collections::{List, Map, Set};
+    }
+    ⟼ 0;
+}
+
+// Module versioning benchmark
+ι benchmark_module_versioning() ⟼ {
+    for (ι i = 0; i < 100; i = i + 1) {
+        ⟑ utils v"1.0.0"::{helper1, helper2};
+        ⟑ format v"^2.0.0"::{formatter};
+        ⟑ logging v">=1.0.0,<2.0.0"::{Logger};
+    }
+    ⟼ 0;
+}
+
+// Module aliasing benchmark
+ι benchmark_module_aliasing() ⟼ {
+    for (ι i = 0; i < 100; i = i + 1) {
+        ⟑ very_long_module_name as m;
+        ⟑ another_long_module_name as a;
+        
+        m::function1();
+        a::function2();
+    }
+    ⟼ 0;
+}
+
+// Partial re-exports benchmark
+ι benchmark_partial_reexports() ⟼ {
+    for (ι i = 0; i < 100; i = i + 1) {
+        λ my_module {
+            ⊢ ⟑ utils::helper1 as h1;
+            ⊢ ⟑ utils::helper2 as h2;
+            
+            ι internal_function() ⟼ {
+                ⟼ h1() + h2();
+            }
+            
+            ⊢ internal_function as combined;
+        }
+        
+        my_module::combined();
+    }
+    ⟼ 0;
+}
+
+// Conditional compilation benchmark
+ι benchmark_conditional_compilation() ⟼ {
+    for (ι i = 0; i < 100; i = i + 1) {
+        #[if(feature="web")] {
+            ⟑ web::{fetch, request};
+        }
+        
+        #[if(feature="native")] {
+            ⟑ native::{file, process};
+        }
+        
+        #[if(feature="debug")] {
+            ⟑ debug::{log, trace};
+        }
+    }
+    ⟼ 0;
+}
+
+// Circular dependency resolution benchmark
+ι benchmark_circular_dependencies() ⟼ {
+    for (ι i = 0; i < 100; i = i + 1) {
+        λ module_a {
+            ⟑ module_b::{functionB};
+            
+            ι functionA() ⟼ {
+                ⟼ functionB() + 1;
+            }
+            
+            ⊢ functionA;
+        }
+        
+        λ module_b {
+            ⟑ module_a::{functionA};
+            
+            ι functionB() ⟼ {
+                ⟼ functionA() + 2;
+            }
+            
+            ⊢ functionB;
+        }
+    }
+    ⟼ 0;
+}
+
+// Run all benchmarks
+ι run_module_benchmarks() ⟼ {
+    ⌽ "Running Module System Benchmarks...";
+    
+    ⌽ "Module Loading Benchmark: " + benchmark_module_loading();
+    ⌽ "Module Versioning Benchmark: " + benchmark_module_versioning();
+    ⌽ "Module Aliasing Benchmark: " + benchmark_module_aliasing();
+    ⌽ "Partial Re-exports Benchmark: " + benchmark_partial_reexports();
+    ⌽ "Conditional Compilation Benchmark: " + benchmark_conditional_compilation();
+    ⌽ "Circular Dependencies Benchmark: " + benchmark_circular_dependencies();
+    
+    ⌽ "Module System Benchmarks Complete!";
+}

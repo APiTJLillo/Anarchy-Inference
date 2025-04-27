@@ -1,0 +1,175 @@
+// Real-world Scenario Benchmarks for Anarchy Inference
+
+// Web request handling benchmark
+ι benchmark_web_requests() ⟼ {
+    ι responses = [];
+    for (ι i = 0; i < 100; i = i + 1) {
+        ι response = ⇓ "https://jsonplaceholder.typicode.com/todos/" + i;
+        responses.push(response);
+    }
+    ⟼ responses.length;
+}
+
+// Data processing benchmark
+ι benchmark_data_processing() ⟼ {
+    ι data = [];
+    for (ι i = 0; i < 10000; i = i + 1) {
+        data.push({
+            id: i,
+            value: i * Math.random()
+        });
+    }
+    
+    ι filtered = data.filter(item ⟼ item.value > 5000);
+    ι mapped = filtered.map(item ⟼ item.value * 2);
+    ι sum = mapped.reduce((acc, val) ⟼ acc + val, 0);
+    
+    ⟼ sum;
+}
+
+// Text processing benchmark
+ι benchmark_text_processing() ⟼ {
+    ι text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. ".repeat(1000);
+    
+    // Count words
+    ι words = text.split(" ");
+    ι wordCount = words.length;
+    
+    // Count characters
+    ι charCount = text.length;
+    
+    // Find and replace
+    ι replaced = text.replace("Lorem", "LOREM").replace("ipsum", "IPSUM");
+    
+    // Split into sentences
+    ι sentences = text.split(". ");
+    
+    ⟼ wordCount + charCount + sentences.length;
+}
+
+// JSON parsing benchmark
+ι benchmark_json_parsing() ⟼ {
+    ι jsonObjects = [];
+    
+    for (ι i = 0; i < 1000; i = i + 1) {
+        ι jsonStr = '{"id":' + i + ',"name":"Item ' + i + '","values":[' + 
+                    (i*2) + ',' + (i*3) + ',' + (i*4) + '],"metadata":{"created":' + 
+                    Date.now() + ',"tags":["tag1","tag2","tag3"]}}';
+        
+        ι parsed = JSON.parse(jsonStr);
+        jsonObjects.push(parsed);
+    }
+    
+    // Process the objects
+    ι sum = 0;
+    for (ι i = 0; i < jsonObjects.length; i = i + 1) {
+        sum = sum + jsonObjects[i].id;
+        for (ι j = 0; j < jsonObjects[i].values.length; j = j + 1) {
+            sum = sum + jsonObjects[i].values[j];
+        }
+    }
+    
+    ⟼ sum;
+}
+
+// Algorithm implementation benchmark - Quicksort
+ι partition(arr, low, high) ⟼ {
+    ι pivot = arr[high];
+    ι i = low - 1;
+    
+    for (ι j = low; j < high; j = j + 1) {
+        if (arr[j] <= pivot) {
+            i = i + 1;
+            ι temp = arr[i];
+            arr[i] = arr[j];
+            arr[j] = temp;
+        }
+    }
+    
+    ι temp = arr[i + 1];
+    arr[i + 1] = arr[high];
+    arr[high] = temp;
+    
+    ⟼ i + 1;
+}
+
+ι quicksort(arr, low, high) ⟼ {
+    if (low < high) {
+        ι pi = partition(arr, low, high);
+        quicksort(arr, low, pi - 1);
+        quicksort(arr, pi + 1, high);
+    }
+}
+
+ι benchmark_algorithms() ⟼ {
+    // Generate random array
+    ι arr = [];
+    for (ι i = 0; i < 1000; i = i + 1) {
+        arr.push(Math.floor(Math.random() * 10000));
+    }
+    
+    // Sort the array
+    quicksort(arr, 0, arr.length - 1);
+    
+    ⟼ arr.length;
+}
+
+// Database operations benchmark (simulated)
+ι benchmark_database_operations() ⟼ {
+    // Simulate a database with tables
+    ι users = [];
+    ι posts = [];
+    ι comments = [];
+    
+    // Insert data
+    for (ι i = 0; i < 1000; i = i + 1) {
+        users.push({
+            id: i,
+            name: "User " + i,
+            email: "user" + i + "@example.com"
+        });
+        
+        for (ι j = 0; j < 5; j = j + 1) {
+            ι postId = i * 5 + j;
+            posts.push({
+                id: postId,
+                userId: i,
+                title: "Post " + postId,
+                content: "Content for post " + postId
+            });
+            
+            for (ι k = 0; k < 3; k = k + 1) {
+                comments.push({
+                    id: postId * 3 + k,
+                    postId: postId,
+                    userId: Math.floor(Math.random() * 1000),
+                    content: "Comment on post " + postId
+                });
+            }
+        }
+    }
+    
+    // Query: Find all comments for posts by user 42
+    ι user42PostIds = posts
+        .filter(post ⟼ post.userId === 42)
+        .map(post ⟼ post.id);
+    
+    ι user42Comments = comments
+        .filter(comment ⟼ user42PostIds.includes(comment.postId));
+    
+    ⟼ user42Comments.length;
+}
+
+// Run all benchmarks
+ι run_realworld_benchmarks() ⟼ {
+    ⌽ "Running Real-world Scenario Benchmarks...";
+    
+    ⌽ "Web Requests Benchmark: " + benchmark_web_requests();
+    ⌽ "Data Processing Benchmark: " + benchmark_data_processing();
+    ⌽ "Text Processing Benchmark: " + benchmark_text_processing();
+    ⌽ "JSON Parsing Benchmark: " + benchmark_json_parsing();
+    ⌽ "Algorithms Benchmark: " + benchmark_algorithms();
+    ⌽ "Database Operations Benchmark: " + benchmark_database_operations();
+    
+    ⌽ "Real-world Scenario Benchmarks Complete!";
+}

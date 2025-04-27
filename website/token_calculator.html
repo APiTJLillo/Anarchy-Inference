@@ -1,0 +1,109 @@
+<!-- Token Calculator Component for Anarchy Inference Website -->
+<section id="token-calculator" class="py-16 bg-gray-50">
+    <div class="container mx-auto px-6">
+        <h2 class="text-3xl font-bold text-center mb-8">Token Savings Calculator</h2>
+        <p class="text-gray-600 text-center mb-12 max-w-3xl mx-auto">
+            Estimate how many tokens you can save by using Anarchy Inference instead of traditional programming languages.
+            Enter your estimated code size to see potential savings in tokens and costs.
+        </p>
+        
+        <div class="bg-white p-8 rounded-lg shadow-md max-w-4xl mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div>
+                    <h3 class="text-xl font-bold mb-4">Input Parameters</h3>
+                    
+                    <div class="mb-4">
+                        <label for="code-size" class="block text-gray-700 mb-2">Code Size (lines)</label>
+                        <input type="number" id="code-size" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" 
+                               placeholder="e.g., 1000" min="1" value="1000">
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="language-select" class="block text-gray-700 mb-2">Compare With</label>
+                        <select id="language-select" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <option value="python">Python</option>
+                            <option value="javascript">JavaScript</option>
+                            <option value="rust">Rust</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="model-select" class="block text-gray-700 mb-2">LLM Model</label>
+                        <select id="model-select" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <option value="gpt4">GPT-4 ($0.03/1K tokens)</option>
+                            <option value="gpt35">GPT-3.5 ($0.0015/1K tokens)</option>
+                            <option value="claude">Claude ($0.025/1K tokens)</option>
+                            <option value="custom">Custom Rate</option>
+                        </select>
+                    </div>
+                    
+                    <div id="custom-rate-container" class="mb-4 hidden">
+                        <label for="custom-rate" class="block text-gray-700 mb-2">Custom Rate ($ per 1K tokens)</label>
+                        <input type="number" id="custom-rate" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" 
+                               placeholder="e.g., 0.02" min="0.0001" step="0.0001" value="0.02">
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="monthly-executions" class="block text-gray-700 mb-2">Monthly Executions</label>
+                        <input type="number" id="monthly-executions" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" 
+                               placeholder="e.g., 1000" min="1" value="1000">
+                    </div>
+                    
+                    <button id="calculate-button" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg transition w-full">
+                        Calculate Savings
+                    </button>
+                </div>
+                
+                <div id="results-container" class="hidden">
+                    <h3 class="text-xl font-bold mb-4">Results</h3>
+                    
+                    <div class="mb-6 p-4 bg-indigo-50 rounded-lg">
+                        <h4 class="font-bold text-lg mb-2">Token Comparison</h4>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <p class="text-gray-700">Standard Language:</p>
+                                <p id="standard-tokens" class="text-2xl font-bold text-indigo-600">0</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-700">Anarchy Inference:</p>
+                                <p id="anarchy-tokens" class="text-2xl font-bold text-indigo-600">0</p>
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <p class="text-gray-700">Tokens Saved:</p>
+                            <p id="tokens-saved" class="text-2xl font-bold text-green-600">0 (0%)</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-6 p-4 bg-green-50 rounded-lg">
+                        <h4 class="font-bold text-lg mb-2">Cost Savings</h4>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <p class="text-gray-700">Standard Cost:</p>
+                                <p id="standard-cost" class="text-2xl font-bold text-indigo-600">$0.00</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-700">Anarchy Inference Cost:</p>
+                                <p id="anarchy-cost" class="text-2xl font-bold text-indigo-600">$0.00</p>
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <p class="text-gray-700">Monthly Savings:</p>
+                            <p id="monthly-savings" class="text-2xl font-bold text-green-600">$0.00</p>
+                        </div>
+                        <div class="mt-2">
+                            <p class="text-gray-700">Annual Savings:</p>
+                            <p id="annual-savings" class="text-2xl font-bold text-green-600">$0.00</p>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center">
+                        <a href="https://github.com/APiTJLillo/Anarchy-Inference" class="inline-block bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg transition">
+                            Get Started with Anarchy Inference
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

@@ -1,0 +1,73 @@
+{
+  "variables": {
+    "prefix": "var",
+    "body": ["${1:variable}=${2:value}"],
+    "description": "Variable declaration"
+  },
+  "function": {
+    "prefix": "func",
+    "body": ["${1:function_name}(${2:parameters})=${3:expression}"],
+    "description": "Function definition"
+  },
+  "conditional": {
+    "prefix": "if",
+    "body": ["?(${1:condition}){", "\t${2:// code}", "}"],
+    "description": "Conditional statement"
+  },
+  "loop": {
+    "prefix": "loop",
+    "body": ["@(${1:i}=0;${1:i}<${2:count};${1:i}++){", "\t${3:// code}", "}"],
+    "description": "Loop statement"
+  },
+  "print": {
+    "prefix": "print",
+    "body": ["print(${1:\"Hello, World!\"})"],
+    "description": "Print statement"
+  },
+  "string-manipulation": {
+    "prefix": "str",
+    "body": [
+      "# String manipulation",
+      "s=\"${1:text}\"",
+      "length=len(s)",
+      "upper_case=upper(s)",
+      "lower_case=lower(s)"
+    ],
+    "description": "String manipulation example"
+  },
+  "file-operations": {
+    "prefix": "file",
+    "body": [
+      "# File operations",
+      "write(\"${1:filename.txt}\", \"${2:content}\")",
+      "content=read(\"${1:filename.txt}\")",
+      "append(\"${1:filename.txt}\", \"${3:additional content}\")"
+    ],
+    "description": "File operations example"
+  },
+  "web-request": {
+    "prefix": "web",
+    "body": [
+      "# Web request",
+      "response=get(\"${1:https://example.com}\")",
+      "data=parse(response)",
+      "print(data)"
+    ],
+    "description": "Web request example"
+  },
+  "data-processing": {
+    "prefix": "data",
+    "body": [
+      "# Data processing",
+      "data=[",
+      "\t{\"name\":\"${1:Alice}\", \"age\":${2:30}},",
+      "\t{\"name\":\"${3:Bob}\", \"age\":${4:25}}",
+      "]",
+      "",
+      "filter_fn(person)=person.age>${5:28}",
+      "filtered=filter(data, filter_fn)",
+      "print(\"Filtered:\", filtered)"
+    ],
+    "description": "Data processing example"
+  }
+}

@@ -1,0 +1,91 @@
+// String manipulation example in Anarchy Inference (Optimized for token efficiency)
+// Revised based on tokenization analysis
+
+m{
+  main(){
+    // Sample text
+    text="The quick brown fox jumps over the lazy dog";
+    print("Original: "+text);
+    
+    try{
+      // String operations
+      
+      // 1. Length and substrings
+      len=text.length;
+      print("Length: "+len);
+      
+      first5=text.substring(0,5);
+      last5=text.substring(len-5);
+      print("First 5: "+first5);
+      print("Last 5: "+last5);
+      
+      // 2. Case conversion
+      upper=text.toUpperCase();
+      lower=text.toLowerCase();
+      print("Uppercase: "+upper);
+      print("Lowercase: "+lower);
+      
+      // 3. Splitting and joining
+      words=text.split(" ");
+      print("Word count: "+words.length);
+      
+      reversed=[];
+      for(i=words.length-1;i>=0;i--){
+        reversed.push(words[i]);
+      }
+      
+      reversedText=reversed.join(" ");
+      print("Reversed: "+reversedText);
+      
+      // 4. Search and replace
+      hasWord=text.includes("fox");
+      print("Contains 'fox': "+hasWord);
+      
+      position=text.indexOf("fox");
+      print("Position of 'fox': "+position);
+      
+      replaced=text.replace("fox", "cat");
+      print("Replaced: "+replaced);
+      
+      // 5. Character manipulation
+      chars=text.split("");
+      
+      // Count vowels
+      vowels=0;
+      for(i=0;i<chars.length;i++){
+        c=chars[i].toLowerCase();
+        if(c=="a" || c=="e" || c=="i" || c=="o" || c=="u"){
+          vowels++;
+        }
+      }
+      print("Vowel count: "+vowels);
+      
+      // Create character frequency map
+      freq={};
+      for(i=0;i<chars.length;i++){
+        c=chars[i].toLowerCase();
+        if(c!=" "){
+          if(!freq[c]) freq[c]=0;
+          freq[c]++;
+        }
+      }
+      
+      // Find most common character
+      mostCommon="";
+      maxCount=0;
+      for(c in freq){
+        if(freq[c]>maxCount){
+          maxCount=freq[c];
+          mostCommon=c;
+        }
+      }
+      
+      print("Most common character: '"+mostCommon+"' ("+maxCount+" occurrences)");
+      
+      return 1;
+    }catch(err){
+      print("Error: "+err);
+      return 0;
+    }
+  }
+}

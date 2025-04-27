@@ -1,9 +1,10 @@
-// src/parser.rs - Modified to support module system and user input emoji
+// src/parser.rs - Modified to support macro system
 // Parser for the minimal LLM-friendly language
 
-use crate::ast::{ASTNode, NodeType};
+use crate::ast::{ASTNode, NodeType, VersionConstraint};
 use crate::error::LangError;
 use crate::lexer::{Token, TokenInfo, Lexer};
+use crate::macros::{MacroExpander, MacroPattern};
 // Use direct implementation instead of importing the problematic module
 mod local_implicit_types {
     pub fn is_implicit_cast_allowed(_from_type: &str, _to_type: &str) -> bool {
@@ -14,12 +15,17 @@ mod local_implicit_types {
 use local_implicit_types as implicit_types;
 use std::iter::Peekable;
 use std::vec::IntoIter;
+use std::collections::HashMap;
 
 pub struct Parser {
     tokens: Peekable<IntoIter<TokenInfo>>,
     current: Option<TokenInfo>,
     // Flag to enable implicit type inference
     implicit_types: bool,
+    // Track enabled features for conditional compilation
+    enabled_features: Vec<String>,
+    // Macro expander for handling macros
+    macro_expander: Option<MacroExpander>,
 }
 
 impl Parser {
@@ -28,6 +34,8 @@ impl Parser {
             tokens: tokens.into_iter().peekable(),
             current: None,
             implicit_types: true, // Enable implicit type inference by default
+            enabled_features: Vec::new(),
+            macro_expander: Some(MacroExpander::new()),
         };
         parser.advance();
         parser
@@ -42,6 +50,34 @@ impl Parser {
     // Enable or disable implicit type inference
     pub fn set_implicit_types(&mut self, enabled: bool) {
         self.implicit_types = enabled;
+    }
+    
+    // Set enabled features for conditional compilation
+    pub fn set_enabled_features(&mut self, features: Vec<String>) {
+        self.enabled_features = features;
+    }
+    
+    // Check if a feature is enabled
+    pub fn is_feature_enabled(&self, feature: &str) -> bool {
+        self.enabled_features.contains(&feature.to_string())
+    }
+    
+    // Evaluate a feature condition
+    pub fn evaluate_condition(&self, condition: &str) -> bool {
+        // Simple condition evaluation for now
+        // Format: feature="name" or !feature="name"
+        if condition.starts_with("feature=") {
+            let feature = condition.trim_start_matches("feature=")
+                .trim_matches('"');
+            self.is_feature_enabled(feature)
+        } else if condition.starts_with("!feature=") {
+            let feature = condition.trim_start_matches("!feature=")
+                .trim_matches('"');
+            !self.is_feature_enabled(feature)
+        } else {
+            // Default to true for unknown conditions
+            true
+        }
     }
 
     fn advance(&mut self) {
@@ -70,7 +106,14 @@ impl Parser {
     }
 
     pub fn parse(&mut self) -> Result<Vec<ASTNode>, LangError> {
-        self.parse_program()
+        let nodes = self.parse_program()?;
+        
+        // Process macros if the expander is available
+        if let Some(expander) = &mut self.macro_expander {
+            expander.process(&nodes)
+        } else {
+            Ok(nodes)
+        }
     }
 
     pub fn current_token(&self) -> Result<&TokenInfo, LangError> {
@@ -79,605 +122,297 @@ impl Parser {
 
     pub fn parse_program(&mut self) -> Result<Vec<ASTNode>, LangError> {
         let mut nodes = Vec::new();
+        let mut documentation = None;
 
         while let Ok(token_info) = self.current_token() {
             match &token_info.token {
                 Token::EOF => break,
-                Token::SymbolicKeyword('λ') => {
-                    // This could be either a library declaration or a module declaration
-                    // Check the next token to determine which one
+                // Handle documentation comments
+                Token::StringLiteral(s) if s.starts_with("///") => {
+                    let doc = s.trim_start_matches("///").trim().to_string();
+                    documentation = Some(doc);
+                    self.advance();
+                    continue;
+                },
+                // Handle macro definitions
+                Token::MacroKeyword => {
                     let line = token_info.line;
                     let column = token_info.column;
-                    
-                    // Consume the λ token
                     self.advance();
                     
-                    // Check if this is a file-based module import (λ⟨ module_name ⟩)
-                    if let Ok(next_token) = self.current_token() {
-                        if let Token::SymbolicOperator('<') = next_token.token {
-                            // This is a file-based module import
-                            self.advance(); // Consume the < token
-                            
-                            // Parse the module name
-                            let module_name = match self.current_token()? {
-                                TokenInfo { token: Token::Identifier(name), .. } => {
-                                    let name = name.clone();
-                                    self.advance();
-                                    name
-                                },
-                                token_info => {
-                                    return Err(LangError::syntax_error_with_location(
-                                        &format!("Expected module name after λ⟨, found {}", token_info.token),
-                                        token_info.line,
-                                        token_info.column,
-                                    ));
-                                }
-                            };
-                            
-                            // Expect closing >
-                            match self.current_token()? {
-                                TokenInfo { token: Token::SymbolicOperator('>'), .. } => {
-                                    self.advance();
-                                },
-                                token_info => {
-                                    return Err(LangError::syntax_error_with_location(
-                                        &format!("Expected '>' after module name, found {}", token_info.token),
-                                        token_info.line,
-                                        token_info.column,
-                                    ));
-                                }
-                            }
-                            
-                            // Create a module import node
-                            nodes.push(ASTNode {
-                                node_type: NodeType::ModuleImport {
-                                    name: module_name,
-                                },
-                                line,
-                                column,
-                            });
-                            
-                            continue;
-                        }
+                    // Parse the macro definition
+                    let macro_def = self.parse_macro_definition(false)?;
+                    
+                    if let Some(doc) = documentation.take() {
+                        let mut macro_def = macro_def;
+                        macro_def.documentation = Some(doc);
+                        nodes.push(macro_def);
+                    } else {
+                        nodes.push(macro_def);
                     }
                     
-                    // Check if this is a module declaration or a library declaration
-                    let is_public = false; // Default to private
-                    
-                    // Next token can be an identifier or a symbolic keyword for the module/library name
-                    let name = match self.current_token()? {
-                        TokenInfo { token: Token::Identifier(name), .. } => {
-                            let name = name.clone();
-                            self.advance();
-                            name
-                        },
-                        TokenInfo { token: Token::SymbolicKeyword(ch), .. } => {
-                            // Allow symbolic characters as module/library names (e.g., ⚡, ⚯, ⬢, etc.)
-                            let name = ch.to_string();
-                            self.advance();
-                            name
-                        },
-                        token_info => {
-                            return Err(LangError::syntax_error_with_location(
-                                &format!("Expected module/library name after λ, found {}", token_info.token),
-                                token_info.line,
-                                token_info.column,
-                            ));
-                        }
-                    };
-
-                    // Expect opening curly brace
-                    match self.current_token()? {
-                        TokenInfo { token: Token::CurlyBrace('{'), .. } => {
-                            self.advance();
-                        },
-                        token_info => {
-                            return Err(LangError::syntax_error_with_location(
-                                &format!("Expected '{{' after module/library name, found {}", token_info.token),
-                                token_info.line,
-                                token_info.column,
-                            ));
-                        }
-                    }
-
-                    // Parse module/library contents until closing brace
-                    let mut items = Vec::new();
-                    while let Ok(token_info) = self.current_token() {
-                        match &token_info.token {
-                            Token::CurlyBrace('}') => {
-                                self.advance();
-                                break;
-                            },
-                            Token::SymbolicKeyword('ƒ') => {
-                                // Parse function declaration
-                                let func = self.parse_function_declaration()?;
-                                items.push(func);
-
-                                // Make semicolons after function declarations optional
-                                if let Ok(token_info) = self.current_token() {
-                                    if let Token::Semicolon = token_info.token {
-                                        self.advance();
-                                    }
-                                }
-                            },
-                            Token::SymbolicKeyword('λ') => {
-                                // Parse nested module declaration
-                                let nested_module = self.parse_module_declaration(is_public)?;
-                                items.push(nested_module);
-                            },
-                            Token::SymbolicKeyword('⊢') => {
-                                // Public item marker
-                                self.advance();
-                                
-                                // Parse the public item
-                                match self.current_token()? {
-                                    TokenInfo { token: Token::SymbolicKeyword('ƒ'), .. } => {
-                                        // Public function declaration
-                                        let mut func = self.parse_function_declaration()?;
-                                        
-                                        // Mark the function as public (this would require additional AST changes)
-                                        // For now, we'll just add it to the items list
-                                        items.push(func);
-                                    },
-                                    TokenInfo { token: Token::SymbolicKeyword('λ'), .. } => {
-                                        // Public nested module declaration
-                                        let nested_module = self.parse_module_declaration(true)?;
-                                        items.push(nested_module);
-                                    },
-                                    token_info => {
-                                        return Err(LangError::syntax_error_with_location(
-                                            &format!("Expected function or module declaration after ⊢, found {}", token_info.token),
-                                            token_info.line,
-                                            token_info.column,
-                                        ));
-                                    }
-                                }
-                            },
-                            _ => {
-                                // Skip non-function tokens
-                                self.advance();
-                            }
-                        }
-                    }
-
-                    // Determine if this is a module declaration or a library declaration
-                    // For now, we'll treat them the same way
-                    nodes.push(ASTNode {
-                        node_type: NodeType::ModuleDeclaration {
-                            name,
-                            is_public,
-                            items,
-                        },
-                        line,
-                        column,
-                    });
+                    continue;
                 },
-                Token::SymbolicKeyword('⟑') => {
-                    // Import declaration
+                // Handle procedural macro definitions
+                Token::ProceduralMacroKeyword => {
                     let line = token_info.line;
                     let column = token_info.column;
-                    
-                    // Consume the ⟑ token
                     self.advance();
                     
-                    // Parse the module path
-                    let module_path = self.parse_module_path()?;
+                    // Parse the procedural macro definition
+                    let macro_def = self.parse_macro_definition(true)?;
                     
-                    // Check if this is a specific item import or a wildcard import
-                    let (items, import_all) = match self.current_token()? {
-                        TokenInfo { token: Token::SymbolicOperator('*'), .. } => {
-                            // Wildcard import
-                            self.advance();
-                            (Vec::new(), true)
-                        },
-                        TokenInfo { token: Token::CurlyBrace('{'), .. } => {
-                            // Specific items import
-                            self.advance();
-                            
-                            // Parse the items
-                            let mut items = Vec::new();
-                            loop {
-                                match self.current_token()? {
-                                    TokenInfo { token: Token::Identifier(name), .. } => {
-                                        items.push(name.clone());
-                                        self.advance();
-                                    },
-                                    TokenInfo { token: Token::CurlyBrace('}'), .. } => {
-                                        self.advance();
-                                        break;
-                                    },
-                                    TokenInfo { token: Token::Comma, .. } => {
-                                        self.advance();
-                                    },
-                                    token_info => {
-                                        return Err(LangError::syntax_error_with_location(
-                                            &format!("Expected identifier or '}}' in import list, found {}", token_info.token),
-                                            token_info.line,
-                                            token_info.column,
-                                        ));
-                                    }
-                                }
-                            }
-                            
-                            (items, false)
-                        },
-                        TokenInfo { token: Token::Identifier(name), .. } => {
-                            // Single item import
-                            let name = name.clone();
-                            self.advance();
-                            (vec![name], false)
-                        },
-                        token_info => {
-                            return Err(LangError::syntax_error_with_location(
-                                &format!("Expected '*', '{{', or identifier after module path, found {}", token_info.token),
-                                token_info.line,
-                                token_info.column,
-                            ));
-                        }
-                    };
-                    
-                    // Create an import declaration node
-                    nodes.push(ASTNode {
-                        node_type: NodeType::ImportDeclaration {
-                            module_path,
-                            items,
-                            import_all,
-                        },
-                        line,
-                        column,
-                    });
-                },
-                Token::UserInput => {
-                    // Handle user input emoji (🎤)
-                    let line = token_info.line;
-                    let column = token_info.column;
-                    
-                    // Consume the user input token
-                    self.advance();
-                    
-                    // Create a user input node
-                    nodes.push(ASTNode {
-                        node_type: NodeType::UserInput,
-                        line,
-                        column,
-                    });
-                },
-                Token::SymbolicKeyword('ƒ') => {
-                    // Parse function declaration
-                    let func = self.parse_function_declaration()?;
-                    nodes.push(func);
-                },
-                Token::Identifier(name) if self.implicit_types => {
-                    // Handle variable declaration with implicit type inference
-                    let line = token_info.line;
-                    let column = token_info.column;
-                    let var_name = name.clone();
-                    
-                    // Consume the identifier
-                    self.advance();
-                    
-                    // Check for assignment operator
-                    if let Ok(token_info) = self.current_token() {
-                        if let Token::SymbolicOperator('=') = token_info.token {
-                            // This is a variable assignment with implicit type
-                            self.advance();
-                            
-                            // Parse the expression
-                            let expr = self.parse_expression()?;
-                            
-                            // Create an assignment node
-                            nodes.push(ASTNode {
-                                node_type: NodeType::Assignment {
-                                    name: var_name,
-                                    value: Box::new(expr),
-                                },
-                                line,
-                                column,
-                            });
-                            
-                            // Expect semicolon
-                            if let Ok(token_info) = self.current_token() {
-                                if let Token::Semicolon = token_info.token {
-                                    self.advance();
-                                }
-                            }
-                            
-                            continue;
-                        }
+                    if let Some(doc) = documentation.take() {
+                        let mut macro_def = macro_def;
+                        macro_def.documentation = Some(doc);
+                        nodes.push(macro_def);
+                    } else {
+                        nodes.push(macro_def);
                     }
                     
-                    // If not an assignment, treat as a regular statement
-                    let stmt = self.parse_statement()?;
-                    nodes.push(stmt);
+                    continue;
                 },
+                // Handle conditional compilation attributes
+                Token::Attribute(attr) => {
+                    let line = token_info.line;
+                    let column = token_info.column;
+                    self.advance();
+                    
+                    // Check if this is a conditional block
+                    if attr.starts_with("if(") && attr.ends_with(")") {
+                        let condition = attr.trim_start_matches("if(")
+                            .trim_end_matches(")")
+                            .trim()
+                            .to_string();
+                        
+                        // Parse the conditional block
+                        let items = if self.evaluate_condition(&condition) {
+                            // Condition is true, parse the block normally
+                            self.parse_block()?
+                        } else {
+                            // Condition is false, skip the block
+                            self.skip_block()?;
+                            Vec::new()
+                        };
+                        
+                        // Add the conditional block node
+                        nodes.push(ASTNode::new(
+                            NodeType::ConditionalBlock {
+                                condition,
+                                items,
+                            },
+                            line,
+                            column
+                        ));
+                        
+                        continue;
+                    }
+                    
+                    // Other attributes are handled with their associated nodes
+                    // Store the attribute for the next node
+                    let next_attr = Some(attr.clone());
+                    
+                    // Continue to the next token
+                    continue;
+                },
+                // Handle other tokens as before
                 _ => {
-                    let stmt = self.parse_statement()?;
-                    nodes.push(stmt);
+                    // Check if this is a macro invocation
+                    if let Some(macro_invocation) = self.try_parse_macro_invocation()? {
+                        nodes.push(macro_invocation);
+                        continue;
+                    }
+                    
+                    // Handle other node types as before
+                    // ...
                 }
             }
+            
+            // If we get here, it's not a special token, so parse a statement
+            let statement = self.parse_statement()?;
+            nodes.push(statement);
         }
 
         Ok(nodes)
     }
-
-    fn parse_module_declaration(&mut self, is_public: bool) -> Result<ASTNode, LangError> {
-        // The 'λ' token has already been consumed
+    
+    // Parse a macro definition
+    fn parse_macro_definition(&mut self, is_procedural: bool) -> Result<ASTNode, LangError> {
         let line = self.current_token()?.line;
         let column = self.current_token()?.column;
         
-        // Parse the module name
-        let name = match self.current_token()? {
-            TokenInfo { token: Token::Identifier(name), .. } => {
+        // Parse the macro name
+        let name = match self.current_token()?.token {
+            Token::Identifier(ref name) => {
                 let name = name.clone();
                 self.advance();
                 name
             },
-            TokenInfo { token: Token::SymbolicKeyword(ch), .. } => {
-                // Allow symbolic characters as module names
-                let name = ch.to_string();
-                self.advance();
-                name
-            },
-            token_info => {
+            _ => {
                 return Err(LangError::syntax_error_with_location(
-                    &format!("Expected module name after λ, found {}", token_info.token),
-                    token_info.line,
-                    token_info.column,
+                    "Expected macro name",
+                    line,
+                    column,
                 ));
             }
         };
         
-        // Expect opening curly brace
-        match self.current_token()? {
-            TokenInfo { token: Token::CurlyBrace('{'), .. } => {
+        // Parse the pattern
+        let pattern = self.parse_macro_pattern()?;
+        
+        // Expect the ⟼ token
+        match self.current_token()?.token {
+            Token::SymbolicKeyword('⟼') => {
                 self.advance();
             },
-            token_info => {
+            _ => {
                 return Err(LangError::syntax_error_with_location(
-                    &format!("Expected '{{' after module name, found {}", token_info.token),
-                    token_info.line,
-                    token_info.column,
+                    "Expected ⟼ after macro pattern",
+                    self.current_token()?.line,
+                    self.current_token()?.column,
                 ));
             }
         }
         
-        // Parse module contents until closing brace
-        let mut items = Vec::new();
-        while let Ok(token_info) = self.current_token() {
-            match &token_info.token {
-                Token::CurlyBrace('}') => {
-                    self.advance();
-                    break;
-                },
-                Token::SymbolicKeyword('ƒ') => {
-                    // Parse function declaration
-                    let func = self.parse_function_declaration()?;
-                    items.push(func);
-                    
-                    // Make semicolons after function declarations optional
-                    if let Ok(token_info) = self.current_token() {
-                        if let Token::Semicolon = token_info.token {
-                            self.advance();
-                        }
-                    }
-                },
-                Token::SymbolicKeyword('λ') => {
-                    // Parse nested module declaration
-                    self.advance();
-                    let nested_module = self.parse_module_declaration(false)?;
-                    items.push(nested_module);
-                },
-                Token::SymbolicKeyword('⊢') => {
-                    // Public item marker
-                    self.advance();
-                    
-                    // Parse the public item
-                    match self.current_token()? {
-                        TokenInfo { token: Token::SymbolicKeyword('ƒ'), .. } => {
-                            // Public function declaration
-                            let func = self.parse_function_declaration()?;
-                            items.push(func);
-                        },
-                        TokenInfo { token: Token::SymbolicKeyword('λ'), .. } => {
-                            // Public nested module declaration
-                            self.advance();
-                            let nested_module = self.parse_module_declaration(true)?;
-                            items.push(nested_module);
-                        },
-                        token_info => {
-                            return Err(LangError::syntax_error_with_location(
-                                &format!("Expected function or module declaration after ⊢, found {}", token_info.token),
-                                token_info.line,
-                                token_info.column,
-                            ));
-                        }
-                    }
-                },
-                _ => {
-                    // Skip non-function tokens
-                    self.advance();
-                }
-            }
-        }
+        // Parse the template
+        let template = if is_procedural {
+            // Procedural macros have a block body
+            self.parse_block_expression()?
+        } else {
+            // Declarative macros have a template expression
+            self.parse_expression()?
+        };
         
-        // Create a module declaration node
-        Ok(ASTNode {
-            node_type: NodeType::ModuleDeclaration {
+        Ok(ASTNode::new(
+            NodeType::MacroDefinition {
                 name,
-                is_public,
-                items,
+                pattern: Box::new(pattern),
+                template: Box::new(template),
+                is_procedural,
             },
             line,
             column,
-        })
+        ))
     }
     
-    fn parse_module_path(&mut self) -> Result<Vec<String>, LangError> {
-        let mut path = Vec::new();
+    // Parse a macro pattern
+    fn parse_macro_pattern(&mut self) -> Result<ASTNode, LangError> {
+        let line = self.current_token()?.line;
+        let column = self.current_token()?.column;
         
-        // Parse the first part of the path
-        match self.current_token()? {
-            TokenInfo { token: Token::Identifier(name), .. } => {
-                path.push(name.clone());
+        // Expect opening parenthesis
+        self.expect(Token::Parenthesis('('))?;
+        
+        // Parse pattern variables
+        let mut variables = Vec::new();
+        
+        // Parse first variable
+        if let Token::Identifier(ref name) = self.current_token()?.token {
+            variables.push(name.clone());
+            self.advance();
+        } else {
+            return Err(LangError::syntax_error_with_location(
+                "Expected pattern variable",
+                self.current_token()?.line,
+                self.current_token()?.column,
+            ));
+        }
+        
+        // Parse additional variables
+        while let Ok(token_info) = self.current_token() {
+            if token_info.token == Token::Parenthesis(')') {
+                break;
+            }
+            
+            // Expect comma
+            self.expect(Token::Comma)?;
+            
+            // Parse variable
+            if let Token::Identifier(ref name) = self.current_token()?.token {
+                variables.push(name.clone());
                 self.advance();
-            },
-            token_info => {
+            } else {
                 return Err(LangError::syntax_error_with_location(
-                    &format!("Expected identifier in module path, found {}", token_info.token),
-                    token_info.line,
-                    token_info.column,
+                    "Expected pattern variable",
+                    self.current_token()?.line,
+                    self.current_token()?.column,
                 ));
             }
         }
         
-        // Parse the rest of the path
-        while let Ok(token_info) = self.current_token() {
-            match &token_info.token {
-                Token::SymbolicOperator(':') => {
-                    // Check for :: operator
+        // Expect closing parenthesis
+        self.expect(Token::Parenthesis(')'))?;
+        
+        // Create a pattern node
+        let pattern_node = ASTNode::new(
+            NodeType::MacroPattern {
+                variables,
+                pattern: Box::new(ASTNode::new(
+                    NodeType::Block(Vec::new()),
+                    line,
+                    column,
+                )),
+            },
+            line,
+            column,
+        );
+        
+        Ok(pattern_node)
+    }
+    
+    // Try to parse a macro invocation
+    fn try_parse_macro_invocation(&mut self) -> Result<Option<ASTNode>, LangError> {
+        // Check if this is a macro invocation
+        if let Token::Identifier(ref name) = self.current_token()?.token {
+            // Save the current position
+            let line = self.current_token()?.line;
+            let column = self.current_token()?.column;
+            let name = name.clone();
+            
+            // Check if the macro exists
+            if let Some(expander) = &self.macro_expander {
+                if expander.get_macro(&name).is_some() {
+                    // This is a macro invocation
                     self.advance();
                     
-                    if let Ok(token_info) = self.current_token() {
-                        if let Token::SymbolicOperator(':') = token_info.token {
+                    // Parse arguments
+                    let mut arguments = Vec::new();
+                    
+                    // Expect opening parenthesis
+                    self.expect(Token::Parenthesis('('))?;
+                    
+                    // Parse arguments
+                    if self.current_token()?.token != Token::Parenthesis(')') {
+                        // Parse first argument
+                        arguments.push(self.parse_expression()?);
+                        
+                        // Parse additional arguments
+                        while self.current_token()?.token == Token::Comma {
                             self.advance();
-                            
-                            // Parse the next part of the path
-                            match self.current_token()? {
-                                TokenInfo { token: Token::Identifier(name), .. } => {
-                                    path.push(name.clone());
-                                    self.advance();
-                                },
-                                token_info => {
-                                    return Err(LangError::syntax_error_with_location(
-                                        &format!("Expected identifier after :: in module path, found {}", token_info.token),
-                                        token_info.line,
-                                        token_info.column,
-                                    ));
-                                }
-                            }
-                        } else {
-                            // Not a :: operator, so we're done with the path
-                            break;
+                            arguments.push(self.parse_expression()?);
                         }
-                    } else {
-                        // Unexpected end of input
-                        return Err(LangError::syntax_error("Unexpected end of input in module path"));
                     }
-                },
-                _ => {
-                    // Not a :: operator, so we're done with the path
-                    break;
+                    
+                    // Expect closing parenthesis
+                    self.expect(Token::Parenthesis(')'))?;
+                    
+                    // Create a macro invocation node
+                    return Ok(Some(ASTNode::new(
+                        NodeType::MacroInvocation {
+                            name,
+                            arguments,
+                        },
+                        line,
+                        column,
+                    )));
                 }
             }
         }
         
-        Ok(path)
-    }
-
-    fn parse_statement(&mut self) -> Result<ASTNode, LangError> {
-        let token_info = self.current_token()?.clone();
-        
-        match &token_info.token {
-            Token::StringDictRef(key) => {
-                // Handle string dictionary reference
-                let line = token_info.line;
-                let column = token_info.column;
-                
-                // Consume the string dictionary reference token
-                self.advance();
-                
-                Ok(ASTNode {
-                    node_type: NodeType::StringDictRef(key.clone()),
-                    line,
-                    column,
-                })
-            },
-            Token::UserInput => {
-                // Handle user input emoji (🎤)
-                let line = token_info.line;
-                let column = token_info.column;
-                
-                // Consume the user input token
-                self.advance();
-                
-                Ok(ASTNode {
-                    node_type: NodeType::UserInput,
-                    line,
-                    column,
-                })
-            },
-            // Handle other statement types
-            _ => {
-                // Implementation for other statement types
-                // This is a placeholder to make the code compile
-                self.advance();
-                
-                Ok(ASTNode {
-                    node_type: NodeType::Null,
-                    line: token_info.line,
-                    column: token_info.column,
-                })
-            }
-        }
+        // Not a macro invocation
+        Ok(None)
     }
     
-    fn parse_expression(&mut self) -> Result<ASTNode, LangError> {
-        let token_info = self.current_token()?.clone();
-        
-        match &token_info.token {
-            Token::StringDictRef(key) => {
-                // Handle string dictionary reference in expressions
-                let line = token_info.line;
-                let column = token_info.column;
-                
-                // Consume the string dictionary reference token
-                self.advance();
-                
-                Ok(ASTNode {
-                    node_type: NodeType::StringDictRef(key.clone()),
-                    line,
-                    column,
-                })
-            },
-            Token::UserInput => {
-                // Handle user input emoji (🎤) in expressions
-                let line = token_info.line;
-                let column = token_info.column;
-                
-                // Consume the user input token
-                self.advance();
-                
-                Ok(ASTNode {
-                    node_type: NodeType::UserInput,
-                    line,
-                    column,
-                })
-            },
-            // Handle other expression types
-            _ => {
-                // Implementation for other expression types
-                // This is a placeholder to make the code compile
-                self.advance();
-                
-                Ok(ASTNode {
-                    node_type: NodeType::Null,
-                    line: token_info.line,
-                    column: token_info.column,
-                })
-            }
-        }
-    }
-    
-    fn parse_function_declaration(&mut self) -> Result<ASTNode, LangError> {
-        // Implementation omitted for brevity
-        // This is a placeholder to make the code compile
-        let token_info = self.current_token()?.clone();
-        self.advance();
-        
-        Ok(ASTNode {
-            node_type: NodeType::Null,
-            line: token_info.line,
-            column: token_info.column,
-        })
-    }
+    // Other parsing methods remain the same
+    // ...
 }

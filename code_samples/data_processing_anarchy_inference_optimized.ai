@@ -1,0 +1,63 @@
+// Data processing example in Anarchy Inference (Optimized for token efficiency)
+// Revised based on tokenization analysis
+
+m{
+  main(){
+    // Load and process CSV data
+    data=read("data.csv");
+    rows=data.split("\n");
+    headers=rows[0].split(",");
+    
+    // Parse data into objects
+    items=[];
+    for(i=1;i<rows.length;i++){
+      if(!rows[i].trim()) continue;
+      
+      values=rows[i].split(",");
+      item={};
+      
+      for(j=0;j<headers.length;j++){
+        item[headers[j]]=values[j];
+      }
+      
+      // Convert numeric fields
+      item.age=Number(item.age);
+      item.income=Number(item.income);
+      items.push(item);
+    }
+    
+    // Calculate statistics
+    stats={
+      count: items.length,
+      age: {sum:0, avg:0, min:999, max:0},
+      income: {sum:0, avg:0, min:999999, max:0}
+    };
+    
+    for(i=0;i<items.length;i++){
+      // Age stats
+      stats.age.sum+=items[i].age;
+      if(items[i].age<stats.age.min) stats.age.min=items[i].age;
+      if(items[i].age>stats.age.max) stats.age.max=items[i].age;
+      
+      // Income stats
+      stats.income.sum+=items[i].income;
+      if(items[i].income<stats.income.min) stats.income.min=items[i].income;
+      if(items[i].income>stats.income.max) stats.income.max=items[i].income;
+    }
+    
+    // Calculate averages
+    stats.age.avg=stats.age.sum/stats.count;
+    stats.income.avg=stats.income.sum/stats.count;
+    
+    // Print results
+    print("Processed "+stats.count+" records");
+    print("Age - Min: "+stats.age.min+", Max: "+stats.age.max+", Avg: "+stats.age.avg.toFixed(2));
+    print("Income - Min: "+stats.income.min+", Max: "+stats.income.max+", Avg: "+stats.income.avg.toFixed(2));
+    
+    // Save results
+    write("stats.json", JSON.stringify(stats, null, 2));
+    print("Statistics saved to stats.json");
+    
+    return 1;
+  }
+}

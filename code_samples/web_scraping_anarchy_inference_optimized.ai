@@ -1,0 +1,45 @@
+// Web scraping example in Anarchy Inference (Optimized for token efficiency)
+// Revised based on tokenization analysis
+
+m{
+  main(){
+    url="https://example.com";
+    print("Fetching "+url);
+    
+    try{
+      // Fetch webpage
+      r=get(url);
+      
+      if(r.code!=200){
+        print("Error: "+r.code);
+        return 0;
+      }
+      
+      // Extract paragraphs
+      c=r.body;
+      p=[];
+      
+      // Find paragraphs
+      m=regex(c,"<p>(.*?)</p>");
+      
+      for(i=0;i<m.len;i++){
+        p.push(m[i]);
+      }
+      
+      // Show results
+      print("Found "+p.len+" paragraphs");
+      for(i=0;i<3&&i<p.len;i++){
+        print(i+": "+p[i]);
+      }
+      
+      // Save to file
+      write("results.txt",p.join("\n"));
+      print("Results saved");
+      
+      return 1;
+    }catch{
+      print("Error occurred");
+      return 0;
+    }
+  }
+}

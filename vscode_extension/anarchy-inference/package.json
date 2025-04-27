@@ -1,0 +1,60 @@
+{
+  "name": "anarchy-inference",
+  "displayName": "Anarchy Inference",
+  "description": "Language support for Anarchy Inference, a token-minimal programming language designed for LLMs",
+  "version": "0.1.0",
+  "engines": {
+    "vscode": "^1.60.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Snippets"
+  ],
+  "activationEvents": [
+    "onLanguage:anarchy-inference"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "anarchy-inference",
+        "aliases": [
+          "Anarchy Inference",
+          "anarchy-inference"
+        ],
+        "extensions": [
+          ".ai"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "anarchy-inference",
+        "scopeName": "source.anarchy-inference",
+        "path": "./syntaxes/anarchy-inference.tmLanguage.json"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "anarchy-inference",
+        "path": "./snippets/anarchy-inference.json"
+      }
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/APiTJLillo/Anarchy-Inference.git"
+  },
+  "publisher": "anarchy-inference",
+  "author": "Anarchy Inference Team",
+  "license": "MIT",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "bugs": {
+    "url": "https://github.com/APiTJLillo/Anarchy-Inference/issues"
+  },
+  "homepage": "https://github.com/APiTJLillo/Anarchy-Inference#readme"
+}

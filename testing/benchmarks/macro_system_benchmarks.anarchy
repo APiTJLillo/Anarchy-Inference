@@ -1,0 +1,113 @@
+// Macro System Benchmarks for Anarchy Inference
+
+// Declarative macro expansion benchmark
+ℳ repeat(count, body) ⟼ {
+    ι i = 0;
+    while (i < count) {
+        body;
+        i = i + 1;
+    }
+}
+
+ι benchmark_declarative_macros() ⟼ {
+    ι sum = 0;
+    repeat(10000, {
+        sum = sum + 1;
+    });
+    ⟼ sum;
+}
+
+// Procedural macro benchmark
+ℳƒ generate_operations(count) ⟼ {
+    ι result = "ι sum = 0;\n";
+    for (ι i = 0; i < count; i = i + 1) {
+        result = result + "sum = sum + " + i + ";\n";
+    }
+    result = result + "⟼ sum;";
+    ⟼ result;
+}
+
+ι benchmark_procedural_macros() ⟼ {
+    generate_operations(1000)
+}
+
+// Pattern matching macro benchmark
+ℳ swap(a, b) ⟼ {
+    ι temp = a;
+    a = b;
+    b = temp;
+}
+
+ι benchmark_pattern_matching() ⟼ {
+    ι x = 0;
+    ι y = 1000;
+    
+    for (ι i = 0; i < 10000; i = i + 1) {
+        swap(x, y);
+    }
+    
+    ⟼ x + y;
+}
+
+// Hygiene mechanism benchmark
+ℳ hygienic_sum(a, b) ⟼ {
+    ι result = a + b;
+    ⟼ result;
+}
+
+ι benchmark_hygiene() ⟼ {
+    ι sum = 0;
+    for (ι i = 0; i < 10000; i = i + 1) {
+        ι result = 100;  // This shouldn't affect the macro
+        sum = sum + hygienic_sum(i, i + 1);
+    }
+    ⟼ sum;
+}
+
+// Recursive macro benchmark
+ℳ factorial(n) ⟼ {
+    if (n <= 1) {
+        ⟼ 1;
+    } else {
+        ⟼ n * factorial(n - 1);
+    }
+}
+
+ι benchmark_recursive_macros() ⟼ {
+    ι sum = 0;
+    for (ι i = 1; i <= 10; i = i + 1) {
+        sum = sum + factorial(i);
+    }
+    ⟼ sum;
+}
+
+// Nested macro benchmark
+ℳ outer(x) ⟼ {
+    inner(x + 1)
+}
+
+ℳ inner(y) ⟼ {
+    y * y
+}
+
+ι benchmark_nested_macros() ⟼ {
+    ι sum = 0;
+    for (ι i = 0; i < 1000; i = i + 1) {
+        sum = sum + outer(i);
+    }
+    ⟼ sum;
+}
+
+// Run all benchmarks
+ι run_macro_benchmarks() ⟼ {
+    ⌽ "Running Macro System Benchmarks...";
+    
+    ⌽ "Declarative Macros Benchmark: " + benchmark_declarative_macros();
+    ⌽ "Procedural Macros Benchmark: " + benchmark_procedural_macros();
+    ⌽ "Pattern Matching Benchmark: " + benchmark_pattern_matching();
+    ⌽ "Hygiene Mechanism Benchmark: " + benchmark_hygiene();
+    ⌽ "Recursive Macros Benchmark: " + benchmark_recursive_macros();
+    ⌽ "Nested Macros Benchmark: " + benchmark_nested_macros();
+    
+    ⌽ "Macro System Benchmarks Complete!";
+}

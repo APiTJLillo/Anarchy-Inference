@@ -1,0 +1,134 @@
+// Memory Management Benchmarks for Anarchy Inference
+
+// Object allocation benchmark
+ι benchmark_object_allocation() ⟼ {
+    ι objects = [];
+    for (ι i = 0; i < 10000; i = i + 1) {
+        objects.push({
+            id: i,
+            name: "Object " + i,
+            value: i * 2
+        });
+    }
+    ⟼ objects.length;
+}
+
+// Object property access benchmark
+ι benchmark_property_access() ⟼ {
+    ι obj = {};
+    for (ι i = 0; i < 1000; i = i + 1) {
+        obj["prop" + i] = i;
+    }
+    
+    ι sum = 0;
+    for (ι i = 0; i < 1000; i = i + 1) {
+        sum = sum + obj["prop" + i];
+    }
+    
+    ⟼ sum;
+}
+
+// Garbage collection benchmark
+ι benchmark_gc() ⟼ {
+    for (ι i = 0; i < 100; i = i + 1) {
+        ι objects = [];
+        for (ι j = 0; j < 10000; j = j + 1) {
+            objects.push({
+                id: j,
+                value: j * 2
+            });
+        }
+    }
+    ⟼ 0;
+}
+
+// Reference handling benchmark
+ι benchmark_references() ⟼ {
+    ι original = {
+        value: 42,
+        nested: {
+            value: 100
+        }
+    };
+    
+    ι copies = [];
+    for (ι i = 0; i < 10000; i = i + 1) {
+        // Create a shallow copy
+        ι copy = {};
+        for (ι key in original) {
+            copy[key] = original[key];
+        }
+        copies.push(copy);
+    }
+    
+    // Modify all copies
+    for (ι i = 0; i < copies.length; i = i + 1) {
+        copies[i].value = i;
+    }
+    
+    ⟼ copies.length;
+}
+
+// Circular reference benchmark
+ι benchmark_circular_references() ⟼ {
+    for (ι i = 0; i < 1000; i = i + 1) {
+        ι obj1 = {};
+        ι obj2 = {};
+        
+        obj1.ref = obj2;
+        obj2.ref = obj1;
+        
+        // Create a chain of references
+        ι current = obj1;
+        for (ι j = 0; j < 100; j = j + 1) {
+            ι next = {};
+            current.next = next;
+            next.prev = current;
+            current = next;
+        }
+    }
+    
+    ⟼ 0;
+}
+
+// Memory fragmentation benchmark
+ι benchmark_memory_fragmentation() ⟼ {
+    ι objects = [];
+    
+    // Allocate objects
+    for (ι i = 0; i < 10000; i = i + 1) {
+        objects.push({
+            id: i,
+            data: "x".repeat(i % 100)
+        });
+    }
+    
+    // Delete every other object to create fragmentation
+    for (ι i = 0; i < objects.length; i = i + 2) {
+        objects[i] = null;
+    }
+    
+    // Allocate new objects
+    for (ι i = 0; i < 5000; i = i + 1) {
+        objects.push({
+            id: i + 10000,
+            data: "y".repeat((i % 100) + 50)
+        });
+    }
+    
+    ⟼ objects.filter(obj ⟼ obj !== null).length;
+}
+
+// Run all benchmarks
+ι run_memory_benchmarks() ⟼ {
+    ⌽ "Running Memory Management Benchmarks...";
+    
+    ⌽ "Object Allocation Benchmark: " + benchmark_object_allocation();
+    ⌽ "Property Access Benchmark: " + benchmark_property_access();
+    ⌽ "Garbage Collection Benchmark: " + benchmark_gc();
+    ⌽ "References Benchmark: " + benchmark_references();
+    ⌽ "Circular References Benchmark: " + benchmark_circular_references();
+    ⌽ "Memory Fragmentation Benchmark: " + benchmark_memory_fragmentation();
+    
+    ⌽ "Memory Management Benchmarks Complete!";
+}

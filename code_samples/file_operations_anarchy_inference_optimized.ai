@@ -1,0 +1,57 @@
+// File operations example in Anarchy Inference (Optimized for token efficiency)
+// Revised based on tokenization analysis
+
+m{
+  main(){
+    // File paths
+    src="source.txt";
+    dest="destination.txt";
+    backup="backup.txt";
+    
+    try{
+      // Check if source file exists
+      if(!exists(src)){
+        print("Error: Source file not found");
+        return 0;
+      }
+      
+      // Read source file
+      content=read(src);
+      print("Read "+content.length+" bytes from "+src);
+      
+      // Create backup
+      write(backup, content);
+      print("Backup created at "+backup);
+      
+      // Process content (convert to uppercase)
+      processed=content.toUpperCase();
+      
+      // Write to destination
+      write(dest, processed);
+      print("Processed content written to "+dest);
+      
+      // Read directory contents
+      files=readdir(".");
+      print("Directory contains "+files.length+" files:");
+      
+      // List files and sizes
+      for(i=0;i<files.length;i++){
+        if(isFile(files[i])){
+          size=fileSize(files[i]);
+          print("- "+files[i]+" ("+size+" bytes)");
+        }
+      }
+      
+      // Append timestamp to log
+      timestamp=Date.now();
+      log="operation completed at "+timestamp+"\n";
+      append("log.txt", log);
+      print("Log updated");
+      
+      return 1;
+    }catch(err){
+      print("Error: "+err);
+      return 0;
+    }
+  }
+}

@@ -1,0 +1,70 @@
+// File operations example in Anarchy Inference
+// Tests the interpreter's file handling capabilities
+
+m{
+  main(){
+    // Test file paths
+    test_file = "test_output.txt";
+    test_data = "test_data.json";
+    
+    // Test writing to a file
+    content = "This is a test file created by Anarchy Inference.\n";
+    content += "It demonstrates file operations capabilities.\n";
+    content += "Created at: " + Date.now();
+    
+    print("Writing to file:", test_file);
+    write(test_file, content);
+    
+    // Test reading from a file
+    print("Reading file back:");
+    read_content = read(test_file);
+    print(read_content);
+    
+    // Test appending to a file
+    print("Appending to file...");
+    append(test_file, "\n\nThis line was appended.");
+    
+    // Read the updated file
+    print("Reading updated file:");
+    updated_content = read(test_file);
+    print(updated_content);
+    
+    // Test JSON operations
+    data = {
+      name: "Anarchy Inference",
+      version: "0.1.0",
+      features: ["token-efficiency", "file-operations", "web-requests"],
+      metrics: {
+        token_reduction: {
+          vs_python: 24.3,
+          vs_javascript: 23.4,
+          vs_rust: 35.6
+        }
+      }
+    };
+    
+    // Write JSON data
+    print("Writing JSON data to:", test_data);
+    json_str = JSON.stringify(data, 2);
+    write(test_data, json_str);
+    
+    // Read and parse JSON data
+    print("Reading and parsing JSON data:");
+    json_content = read(test_data);
+    parsed_data = JSON.parse(json_content);
+    
+    print("Token reduction vs Python:", parsed_data.metrics.token_reduction.vs_python + "%");
+    
+    // Test directory operations
+    print("Listing files in current directory:");
+    files = readdir(".");
+    
+    for(i=0; i<files.length; i++){
+      if(files[i].endsWith(".ai") || files[i].endsWith(".txt") || files[i].endsWith(".json")){
+        print(" -", files[i]);
+      }
+    }
+    
+    return 0;
+  }
+}

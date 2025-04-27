@@ -1,0 +1,139 @@
+{
+  "results": {
+    "tasks": [
+      "web_scraping",
+      "data_processing",
+      "api_interaction",
+      "file_operations",
+      "string_manipulation"
+    ],
+    "languages": [
+      "anarchy_inference_optimized",
+      "python",
+      "javascript",
+      "rust"
+    ],
+    "token_counts": {
+      "anarchy_inference_optimized": [
+        224,
+        494,
+        339,
+        314,
+        550
+      ],
+      "python": [
+        307,
+        433,
+        540,
+        604,
+        719
+      ],
+      "javascript": [
+        305,
+        433,
+        518,
+        567,
+        737
+      ],
+      "rust": [
+        306,
+        617,
+        621,
+        673,
+        814
+      ]
+    },
+    "file_sizes": {
+      "anarchy_inference_optimized": [
+        865,
+        1843,
+        1454,
+        1412,
+        2212
+      ],
+      "python": [
+        1388,
+        1855,
+        2274,
+        2754,
+        3038
+      ],
+      "javascript": [
+        1310,
+        1824,
+        2220,
+        2570,
+        3041
+      ],
+      "rust": [
+        1240,
+        2487,
+        2534,
+        3030,
+        3274
+      ]
+    },
+    "char_counts": {
+      "anarchy_inference_optimized": [
+        865,
+        1843,
+        1454,
+        1412,
+        2212
+      ],
+      "python": [
+        1388,
+        1855,
+        2270,
+        2754,
+        3038
+      ],
+      "javascript": [
+        1310,
+        1824,
+        2216,
+        2570,
+        3041
+      ],
+      "rust": [
+        1240,
+        2487,
+        2530,
+        3030,
+        3274
+      ]
+    }
+  },
+  "reductions": {
+    "vs_python": {
+      "task_reductions": [
+        27.035830618892508,
+        -14.087759815242496,
+        37.22222222222222,
+        48.01324503311258,
+        23.504867872044507
+      ],
+      "average_reduction": 24.337681186205867
+    },
+    "vs_javascript": {
+      "task_reductions": [
+        26.557377049180324,
+        -14.087759815242496,
+        34.55598455598455,
+        44.62081128747795,
+        25.37313432835821
+      ],
+      "average_reduction": 23.403909481151707
+    },
+    "vs_rust": {
+      "task_reductions": [
+        26.797385620915033,
+        19.93517017828201,
+        45.410628019323674,
+        53.34323922734027,
+        32.432432432432435
+      ],
+      "average_reduction": 35.58377109565869
+    }
+  }
+}
