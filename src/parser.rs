@@ -416,3 +416,81 @@ impl Parser {
     // Other parsing methods remain the same
     // ...
 }
+
+
+    // --- STUB IMPLEMENTATIONS --- 
+
+    fn parse_block(&mut self) -> Result<Vec<ASTNode>, LangError> {
+        // TODO: Implement actual block parsing logic
+        // For now, just consume tokens until a closing brace or EOF
+        let line = self.current_token()?.line;
+        let column = self.current_token()?.column;
+        self.expect(Token::Brace("{"))?;
+        let mut nodes = Vec::new();
+        while let Ok(token_info) = self.current_token() {
+            if token_info.token == Token::Brace("}") {
+                break;
+            }
+            if token_info.token == Token::EOF {
+                 return Err(LangError::syntax_error_with_location(
+                    "Unexpected EOF while parsing block",
+                    token_info.line,
+                    token_info.column,
+                ));
+            }
+            // Try parsing a statement, if it fails, just advance to avoid infinite loop
+            match self.parse_statement() {
+                Ok(stmt) => nodes.push(stmt),
+                Err(_) => self.advance(), 
+            }
+        }
+        self.expect(Token::Brace("}"))?;
+        Ok(nodes)
+    }
+
+    fn parse_statement(&mut self) -> Result<ASTNode, LangError> {
+        // TODO: Implement actual statement parsing logic
+        let line = self.current_token()?.line;
+        let column = self.current_token()?.column;
+        // Simple stub: return Null node and advance
+        self.advance(); 
+        Ok(ASTNode::new(NodeType::Null, line, column))
+    }
+
+    fn parse_expression(&mut self) -> Result<ASTNode, LangError> {
+        // TODO: Implement actual expression parsing logic
+        let line = self.current_token()?.line;
+        let column = self.current_token()?.column;
+        // Simple stub: return Null node and advance
+        self.advance(); 
+        Ok(ASTNode::new(NodeType::Null, line, column))
+    }
+
+    fn parse_block_expression(&mut self) -> Result<ASTNode, LangError> {
+        // TODO: Implement actual block expression parsing logic
+        let line = self.current_token()?.line;
+        let column = self.current_token()?.column;
+        let nodes = self.parse_block()?;
+        Ok(ASTNode::new(NodeType::Block(nodes), line, column))
+    }
+
+    fn skip_block(&mut self) -> Result<(), LangError> {
+        // TODO: Implement actual block skipping logic
+        self.expect(Token::Brace("{"))?;
+        let mut brace_level = 1;
+        while brace_level > 0 {
+            if let Ok(token_info) = self.current_token() {
+                match token_info.token {
+                    Token::Brace("{") => brace_level += 1,
+                    Token::Brace("}") => brace_level -= 1,
+                    Token::EOF => return Err(LangError::syntax_error("Unexpected EOF while skipping block")),
+                    _ => {},
+                }
+                self.advance();
+            } else {
+                return Err(LangError::syntax_error("Unexpected end of input while skipping block"));
+            }
+        }
+        Ok(())
+    }
+
