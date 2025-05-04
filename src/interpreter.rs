@@ -166,7 +166,7 @@ impl Interpreter {
                 Ok(Value::Complex(gc_value))
             },
             NodeType::FunctionCall { callee, arguments } => {
-                let function_value = self.execute_node(function)?;
+                let function_value = self.execute_node(callee)?;
                 
                 // Evaluate arguments
                 let mut arg_values = Vec::new();
@@ -242,7 +242,7 @@ impl Interpreter {
                     _ => Err(LangError::runtime_error("Condition must be a boolean")),
                 }
             },
-            NodeType::Binary { op, left, right } => {
+            NodeType::Binary { operator, left, right } => {
                 let left_value = self.execute_node(left)?;
                 let right_value = self.execute_node(right)?;
                 
@@ -262,7 +262,7 @@ impl Interpreter {
                     _ => Err(LangError::runtime_error(&format!("Unknown operator: {}", op))),
                 }
             },
-            NodeType::Unary { op, operand } => {
+            NodeType::Unary { operator, operand } => {
                 let operand_value = self.execute_node(operand)?;
                 
                 match op.as_str() {
@@ -546,15 +546,4 @@ impl GarbageCollected for Interpreter {
         }
     }
 }
-
-
-    // --- STUB IMPLEMENTATIONS --- 
-
-    fn allocate_value(&mut self, _value: GcValueImpl) -> GcValue {
-        // TODO: Implement actual GC allocation logic
-        // For now, just return a placeholder or panic
-        unimplemented!("GC allocation not yet implemented");
-        // Alternatively, return a dummy GcValue if needed for compilation:
-        // GcValue::new_placeholder() // Assuming such a method exists or can be added
-    }
 

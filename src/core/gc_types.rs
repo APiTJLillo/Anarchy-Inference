@@ -17,7 +17,7 @@ pub struct GcStats {
 }
 
 /// Trait for garbage collector implementations
-pub trait GarbageCollector: Send + Sync {
+pub trait GarbageCollector { // TODO: Review Send + Sync requirements
     /// Get statistics about the garbage collector
     fn get_stats(&self) -> GcStats;
     
