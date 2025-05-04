@@ -10,7 +10,7 @@ use crate::value::Value;
 use crate::core::string_dict::{StringDictionary, StringDictionaryManager};
 use crate::core::gc_types::GcStats;
 use crate::gc::managed::GcValueImpl;
-use crate::gc::{GarbageCollector, GarbageCollected};
+use crate::core::{GarbageCollector, GarbageCollected};
 use crate::core::value::GcValue;
 
 /// Environment for variable storage

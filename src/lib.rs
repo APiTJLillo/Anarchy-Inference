@@ -21,6 +21,7 @@ pub mod security;
 pub mod semantic;
 pub mod lsp;
 pub mod ui;
+pub mod macros;
 
 // Re-export commonly used types
 pub use ast::{ASTNode, NodeType};
